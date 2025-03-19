@@ -6,7 +6,10 @@ using namespace std;
 //#define Case_2 // overloading operator
 //#define Case_3 // Virtual function
 //#define Case_4 // Base class pointer as function parameter
-#define Case_5 // Static dispatch
+//#define Case_5 // Static dispatch
+//#define Case_6 // Vtable - Vptr
+//#define Case_7 // Virtual Destructor
+#define Case_8 // Final specifier
 /********************************************/
 
 
@@ -137,4 +140,97 @@ void Foo::method_2(){
 int main(){
     return 0;
 }
+#endif
+
+#ifdef Case_6 // Vtable - Vptr
+
+class Ong_noi {
+public:
+    virtual void function_1(){
+        cout<<"Function 1 cua Ong Noi"<<endl;
+    }
+    virtual void function_2(){
+        cout<<"Function 3 cua Ong Noi"<<endl;
+    }
+    virtual void function_3(){
+        cout<<"Function 3 cua Ong Noi"<<endl;
+    }
+};
+class Cha : public Ong_noi {
+public:
+    void function_1() override {
+        cout<<"Function 1 cua Cha"<<endl;
+    }
+
+};
+
+class Con : public Cha{
+public:
+    void function_2() override {
+        cout<<"Function 2 cua Con"<<endl;
+
+    }
+};
+int main(){
+    Ong_noi* a = new Ong_noi();
+    Ong_noi* b = new Cha();
+    Ong_noi* c = new Con();
+
+    a->function_1();
+    a->function_2();
+    a->function_3();
+
+    b->function_1();
+    b->function_2();
+    b->function_3();
+   
+    c->function_1();
+    c->function_2();
+    c->function_3();    
+}
+#endif
+
+#ifdef Case_7 // Virtual Destructor
+class Cha{
+public:
+    Cha(){
+        cout<<"Constructor cua Cha"<<endl;
+    }
+    virtual ~Cha(){
+        cout<<"Destructor cua Cha"<<endl;
+    }
+};
+class Con:public Cha{
+public:
+    Con(){
+        cout<<"Constructor cua Con"<<endl;
+    }
+    ~Con(){
+        cout<<"Destructor cua Con"<<endl;
+    }
+};
+int main(){
+    Cha* ptr = new Con();
+    delete ptr;
+
+}
+
+#endif
+#ifdef Case_8 // Final specifier
+
+class A final{
+public:
+    void funtion(){}
+};
+class B : public A{ // Báo lỗi vì không thể kế thừa
+};
+class C {
+public:
+    virtual void function_1() final {}
+
+};
+class D : public C{
+public:
+    void function_1() override{}
+};
 #endif
