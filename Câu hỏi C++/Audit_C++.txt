@@ -1,0 +1,135 @@
+I. Class và Object – Kiến thức nền tảng
+
+1.Sự khác nhau giữa class và struct trong C++ là gì?
+
+2.Khi nào nên dùng class thay vì struct?
+
+3.Một object trong C++ được lưu ở đâu trong bộ nhớ (stack, heap, static area)?
+
+4.Sự khác nhau giữa object được tạo bằng new và tạo trực tiếp (MyClass obj;) là gì?
+
+5.Có thể tạo object của một class abstract không? Tại sao?
+
+6.Khi bạn sao chép một đối tượng, trình biên dịch C++ tạo ra những gì nếu bạn không định nghĩa copy constructor?
+
+7.Static member variables khác gì so với non-static members?
+
+8.Có thể truy cập biến private của một class khác cùng kiểu không?
+
+9.Khi nào nên dùng friend class / friend function?
+
+10.C++ có garbage collector như Java không? Nếu không thì việc hủy đối tượng hoạt động thế nào?
+
+11.Tại sao const và reference members phải khởi tạo trong initializer list?
+
+12. Size của class duoc tinh nhu the nao ?
+
+ II. Constructor – Tạo và khởi tạo đối tượng
+
+1.Constructor có thể trả về giá trị không? Tại sao?
+
+2.Có thể gọi constructor một cách tường minh không? Ví dụ?
+
+3.Sự khác nhau giữa:
+
+	Default constructor
+
+	Parameterized constructor
+
+	Copy constructor
+
+	Move constructor
+
+4. Khi nào compiler tự động tạo constructor cho bạn?
+
+5. Nếu ta định nghĩa copy constructor thủ công, compiler còn tạo default constructor không?
+
+6.Constructor có thể gọi constructor khác trong cùng class không? (→ delegating constructor, C++11)
+
+7.Có thể khai báo constructor là private không? Khi nào nên làm vậy?
+
+8.Constructor của lớp base class và derived class được gọi theo thứ tự nào?
+
+9.Khi có thành viên const hoặc reference, tại sao ta phải khởi tạo chúng trong initializer list chứ không phải trong thân constructor?
+
+10.Có thể ném exception trong constructor không? Điều gì xảy ra nếu có?
+
+ III. Copy Constructor và Assignment Operator
+
+1.Sự khác nhau giữa copy constructor và assignment operator là gì?
+
+2.Khi nào gọi copy constructor, khi nào gọi operator= ?
+
+3.Nếu class có con trỏ nội bộ, tại sao ta cần định nghĩa copy constructor và operator= riêng?
+
+4.Khi nào copy constructor được gọi “ngầm” (implicit call)?
+
+5.Thế nào là shallow copy và deep copy?
+
+6.Nếu copy constructor nhận tham số không phải reference, điều gì sẽ xảy ra?
+
+7.Sự khác nhau giữa:
+
+	MyClass a = b;
+	MyClass a(b);
+	a = b;
+
+
+8.Làm thế nào để ngăn việc copy một đối tượng?
+
+9.Trong C++11, copy constructor khác gì so với move constructor?
+
+10.Khi nào trình biên dịch bỏ qua việc gọi copy constructor (Return Value Optimization – RVO)?
+
+IV. Destructor – Hủy đối tượng
+
+Destructor có thể overload được không?
+
+Destructor có thể có tham số không?
+
+Khi nào destructor được gọi?
+
+Thứ tự gọi destructor khi:
+
+	Đối tượng có thành viên là class khác
+
+	Đối tượng có kế thừa từ class khác
+	
+	Khi nào destructor nên khai báo là virtual?
+
+Nếu không khai báo destructor là virtual trong lớp base, chuyện gì xảy ra khi xóa qua con trỏ base trỏ tới derived?
+
+Có thể gọi destructor thủ công không? Khi nào nên hoặc không nên?
+
+Destructor có thể ném exception không? Tại sao điều đó nguy hiểm?
+
+Khi delete một con trỏ null, destructor có được gọi không?
+
+Điều gì xảy ra nếu destructor bị private? (gợi ý: Singleton pattern)
+
+ V. Nâng cao & Tình huống thực tế
+
+Khi có một class có thành viên con trỏ, hãy mô tả chu trình khởi tạo – sao chép – hủy của nó.
+
+Khi class có resource (file, socket, memory), bạn sẽ triển khai constructor/destructor như thế nào để tránh leak?
+
+Tại sao nên tuân thủ Rule of Three / Rule of Five trong C++?
+
+Trình biên dịch tự động tạo những hàm nào nếu bạn không định nghĩa gì cả?
+
+Sự khác nhau giữa:
+
+	Default constructor do compiler tạo
+
+	User-defined constructor rỗng
+
+C++11 giới thiệu move constructor và move assignment operator để làm gì?
+
+Khi nào destructor của biến toàn cục (global object) được gọi?
+
+Khi nào destructor của biến static local được gọi?
+
+Nếu một constructor gọi function mà function đó tạo ra exception, destructor nào được gọi, destructor nào không?
+
+Hãy giải thích trình tự gọi constructor và destructor trong chuỗi kế thừa (inheritance chain).
+
