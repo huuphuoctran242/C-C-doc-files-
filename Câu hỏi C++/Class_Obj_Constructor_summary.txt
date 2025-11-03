@@ -1,0 +1,103 @@
+ Tóm tắt kiến thức phải biết: 
+
+- class là bản vẽ, object được tạo ra từ class. 
+- access modifier: 
+	+ public: biến và hàm được khai public thì ai có thể truy cập và sử dụng ở bất kì đâu. 
+	+ private: chỉ thành viên của class và friends của class mới truy cập được. 
+	+ protected: giống private nhưng ngoài ra còn cho lớp kế thừa truy cập nữa. 
+	
+- Constructor: Hàm khởi tạo, được call khi object được tạo. Không return gì hết
+	Thường sử dụng initialization list kết hợp với default value cho tiện.
+	cd: 
+	class Player {
+	 private: 
+		int x;
+		int y;
+		string z;
+	 public:
+		Player(int _x = 0; int _y = 1; string _z = "None"):x(_x),y(_y),z(_z){}
+	};
+	
+- Destructor: hàm hủy, tự động gọi khi object out of scope.
+
+- Copy constructor: Tạo 1 object mới từ 1 object có sẵn. Được gọi khi: 
+	+ truyền object như tham số vào hàm:
+		class Player ... 
+		void display(Player p) {...}	
+	
+	+ return object by value từ hàm
+		Player create_something(){
+			Player player_1(1,1,"abc");
+			return player_1;
+		}
+		
+	+ Tạo 1 object mới từ 1 object đã tồn tại	
+		Player player_1();
+		Player player_2(player_1);
+	
+- Cách viết 1 copy constructor: 
+
+	Player(const Player& source):x(source.x),y(source.y),z(source.z){}
+
+	+ Là constructor nên chắc chắn không return gì cả, nhận tham chiếu của 1 object source 
+	rồi copy các data từ object đó sang object mới. 
+	
+	+ Khi tạo object mới thì copy constructor được gọi: 
+	
+	Player Phuoc;
+	Player Phuoc2(Phuoc);
+	
+- Shallow copy và deep copy: 
+	+ Shallow copy: 
+	Hiểu đơn giản thì shallow copy là copy bình thường, ta tạo 1 vùng nhớ mới cho các data và
+	sau đó copy data từ object 1 sang vùng nhớ mới của object 2. 
+	Vấn đề chỉ xảy ra khi trong class có raw pointer. Điều này có nghĩa khi shallow copy thì 
+	ta sẽ tạo ra 1 con trỏ mới ( có địa chỉ khác con trỏ object 1), tuy nhiên 2 con trỏ này vẫn 
+	trỏ đến cùng 1 vùng nhớ. Điều này dẫn đến 2 lỗi nghiêm trọng phổ biến: double delete và
+	darling pointer.
+	
+	+ Deep copy thì khác, ta phải tự tạo 1 vùng nhớ mới, copy data sang vùng nhớ này. ví dụ: 
+	class Player{
+	 private:
+		int* ptr;
+	 public:
+		Player(const Player& source){
+			ptr = new(Player);
+			*ptr = *source.ptr;
+		}
+
+- Move constructor: ra đời để giải quyết bài toán tránh copy constuctor với các class có tài nguyên
+lớn như chứa vector,....
+
+	-> bản chất không copy mà chuyển quyền sở hữu tài nguyên (shallow copy và vô hiệu hóa nguồn gốc) 
+		Thực tế giống như shallow copy nhưng thay vì để lại object cũ thì ta vô hiệu hóa nó đi.
+	
+	class Player{
+	 private:
+		int* ptr;
+	 public:	
+		Player(Player&& source) no except{
+			ptr = source.ptr; // con trỏ mới sẽ trỏ đến vùng data của object cũ.
+			source.ptr = nullptr;
+		}
+
+- Move constructor sẽ được gọi khi nào ?		
+	Khi source là 1 Rvalue ( có thể cast bằng std::move()
+	Khi return object by value từ hàm (Từ C++ 11 trở lên nha) 
+	Khi container reallocate khi vượt quá size. 
+
+- This pointer: 
+	+ chỉ sử dụng trong hàm thành viên của 1 class, sẽ trỏ đến đối tượng hiện tại của class.
+	+ Truy cập vào data và method của object. 
+	
+	class Player {
+	 private:
+		int score;
+	 public:
+		void counter_up(Player& p){
+			this->score++;
+			return *this;
+		}
+		
+	Player p1;
+	p1.counter_up().counter_up().counter_up();

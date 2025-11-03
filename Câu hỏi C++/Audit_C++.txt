@@ -81,7 +81,13 @@ I. Class và Object – Kiến thức nền tảng
 
 10.Khi nào trình biên dịch bỏ qua việc gọi copy constructor (Return Value Optimization – RVO)?
 
+Hiện tượng thắt nút cổ chai do đâu ?
+
+Tại sao move constructor có noexcept ?
+
 IV. Destructor – Hủy đối tượng
+
+
 
 Destructor có thể overload được không?
 

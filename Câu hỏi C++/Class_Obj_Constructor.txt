@@ -1,0 +1,40 @@
+I. Class và Object – Kiến thức nền tảng
+
+1.Sự khác nhau giữa class và struct trong C++ là gì?
+
+- Trong C++ thì class và struct chỉ có 2 điểm khác biệt:
+	+ access modifier mặc định của class là private, còn của struct là private.
+	+ Kế thừa mặc định của class là private, còn của struct là private.
+	
+2.Khi nào nên dùng class thay vì struct?
+
+- Dùng struct khi chỉ chứa dữ liệu, không cần bảo vệ. 
+- Dùng class khi dữ liệu có methods, cần ẩn thông tin hay có nhiều hành vi phức tạp.
+
+3.Một object trong C++ được lưu ở đâu trong bộ nhớ (stack, heap, static area)?
+
+- Cái này thì tùy ví dụ: 
+	MyClass a; // a nằm ở stack nếu được khai báo trong block, nằm ở data segment nếu khai báo global.
+	MyClass* ptr = new(MyClass); // con trỏ ptr nằm ở stack nhưng object được tạo ra nằm trên heap.
+	
+
+4.Sự khác nhau giữa object được tạo bằng new và tạo trực tiếp (MyClass obj;) là gì?
+
+- Object tạo trực tiếp: MyClass obj; trong function nằm ở stack. Kết thúc hàm thì destructor tự động gọi. 
+- Object tạo bằng new sẽ nằm ở heap. Phải tự delete. 
+
+5.Có thể tạo object của một class abstract không? Tại sao?
+
+6.Khi bạn sao chép một đối tượng, trình biên dịch C++ tạo ra những gì nếu bạn không định nghĩa copy constructor?
+
+7.Static member variables khác gì so với non-static members?
+
+8.Có thể truy cập biến private của một class khác cùng kiểu không?
+
+9.Khi nào nên dùng friend class / friend function?
+
+10.C++ có garbage collector như Java không? Nếu không thì việc hủy đối tượng hoạt động thế nào?
+
+11.Tại sao const và reference members phải khởi tạo trong initializer list?
+
+12. Size của class duoc tinh nhu the nao ?
