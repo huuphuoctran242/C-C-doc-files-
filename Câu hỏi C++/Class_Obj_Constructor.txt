@@ -31,10 +31,314 @@ I. Class và Object – Kiến thức nền tảng
 
 8.Có thể truy cập biến private của một class khác cùng kiểu không?
 
+- không thể. 
+
 9.Khi nào nên dùng friend class / friend function?
 
+- từ khóa friend dùng cho function và class cho phép function và class này truy cập vào thành viên
+private và protected của class đó.
+
+- friend function của class X:
+	+ không phải là thành viên của class X.
+	+ Được phép truy cập vào thành viên protected và private của class X,
+	tất nhiên là phải truyền object vào, trừ static member
+	+ Có thể định nghĩa bên trong class, tuy nhiên sẽ được coi như là hàm global,
+	không phải thành viên. 
+	+ Nên khai báo bên ngoài.
+	+ Cũng có thể là thành viên của 1 class khác. 
+	
+Ví dụ: 
+	class Player {
+	 private: 
+		int x;
+	 public:
+		Player(int _x = 0):x(_x){} 
+		friend void print_x(Player&& p){ // nên dịnh nghĩa bên ngoài
+			cout<<p.x<<endl;
+		}
+	};
+	int main(){
+		Player p(100);
+		print_x(p);
+	}
+	
+	Ta nên định nghĩa bên ngoài: 
+	class Player {
+	  private:
+		int x;
+	  public:
+		Player(int x = 0):x(x){}
+		friend void print_x(Player& p);
+	};
+	void print_x(Player& p){
+		cout<<p.x<<endl;
+	}
+	int main(){
+		Player p(100);
+		print_x(p);
+	}
+
+
+- Ví dụ thường gặp về friend function giữa 2 class:
+
+	class Player2; // khai báo trước Player2
+	class Player {
+	  private:
+		int x;
+	  public:
+		Player(int x = 0):x(x){}
+		friend void print_x(Player& p, Player2& p2);
+	};
+	class Player2{
+	 private:
+		int x;
+	 public:
+		Player2(int x = 0):x(x){}
+		friend void print_x(Player& p, Player2& p2);
+	};
+	void print_x(Player& p,Player2& p2){
+		cout<<p.x<<" and "<<p2.x<<endl;
+	}
+	int main(){
+		Player p(100);
+		Player2 p2(50);
+		print_x(p,p2);
+	}
+	
+- Friend class của 1 class X: 
+	+ Khi 1 class Y được khai báo là friend của 1 class X khác, thì mọi hàm thành viên của Y đều
+	có thể truy cập vào biến private và protected của class X. Tất nhiên là phải truyền Obj kiểu X
+	vào method của Y. trừ biến static
+	
+ class B;
+ class A {
+  private:
+	int x;
+	friend class B; // khai báo friend class ở private,public, protected đều ok
+ public:
+     A(int x =0):x(x){}
+ };
+ class B{
+  public:
+	void showA(const A& a){
+		cout<<a.x<<endl;
+	}
+ };
+ int main(){
+	A a(10);
+	B b;
+	b.showA(a);
+ }
+ 
+ 
+ - Vậy khi nào thì nên dùng friend function và friend class: 
+	+ friend funtion: 
+		- Overload các toán tử để tính toán giữa 2 object khác nhau.
+		- Các hàm cần truy cập dữ liệu nội bộ nhưng logic không thuộc về class.
+	+ friend class:
+		- Dùng khi 2 class có mối quan hệ chặt chẽ với nhau: 
+		Ví dụ:
+		
+	class Node{
+	 private:
+		int data;
+		Node* next;
+		friend class Linklist;
+		Node(int data = 0, Node* next = nullptr):data(data),next(next){}
+	];
+	class Linklist{
+	 public:
+		Node* head;
+		Linklist():head(nullptr){}
+		void insert(int value){
+			Node* n = new Node(value,head);
+			head = n;
+		}
+	};
+ 
+	int main(){
+		Linklist x;
+		x.insert(int 3);
+		
+	}
 10.C++ có garbage collector như Java không? Nếu không thì việc hủy đối tượng hoạt động thế nào?
+	- Không có, nên khi cấp phát động bằng new thì phải nhớ mà delete
 
 11.Tại sao const và reference members phải khởi tạo trong initializer list?
-
+	- Hiểu cơ bản là biến const và reference cần được gán giá trị ngay khi khởi tạo, mà khi vào 
+	thân hàm constructor thì đã khởi tạo xong mất rồi.
+	
 12. Size của class duoc tinh nhu the nao ?
+
+=====================================================================================
+II. Constructor – Tạo và khởi tạo đối tượng
+
+1.Constructor có thể trả về giá trị không? Tại sao?
+	- Constructor không có giá trị trả về.
+	
+2.Có thể gọi constructor một cách tường minh không? Ví dụ?
+	- Tất nhiên là có thể. 
+	
+	Player P(4);
+	Player P = Player(4);
+	hoặc 
+	push_back(Player(1); // tạo 1 Rvale.
+	
+3.Sự khác nhau giữa:
+
+	Default constructor: Constructor mặc định, được gọi chỉ khi ko tự định nghĩa constructor.
+
+	Parameterized constructor
+
+	Copy constructor
+
+	Move constructor
+
+
+4. Khi nào compiler tự động tạo constructor cho bạn?
+- Khi không tự định nghĩa các loại constructor sau thì compiler sẽ tự động tạo default cho mình:
+
+Hàm					Compiler có tự tạo không?	Khi nào không tạo
+Default constructor	✅ Có						Khi bạn định nghĩa bất kỳ constructor nào khác
+Copy constructor	✅ Có						Khi bạn định nghĩa copy/move constructor hoặc assignment
+Copy assignment		✅ Có						Khi bạn định nghĩa copy/move constructor hoặc assignment
+Move constructor	✅ Có (C++11+)				Khi có copy constructor hoặc destructor tự định nghĩa
+Move assignment		✅ Có (C++11+)				Khi có copy constructor hoặc destructor tự định nghĩa
+Destructor			✅ Có						Khi bạn định nghĩa destructor riêng
+ 
+
+5. Nếu ta định nghĩa copy constructor thủ công, compiler còn tạo default constructor không?
+- Không nha.
+6.Constructor có thể gọi constructor khác trong cùng class không? (→ delegating constructor, C++11)
+ - gọi bằng initialization list được nha.
+
+7.Có thể khai báo constructor là private không? Khi nào nên làm vậy?
+ - Có thể khai báo constructor là private, điều này sẽ ngăn việc tạo object một cách bừa bãi.
+ 
+ Player a; // ta sẽ không tạo obj như thế này được. 
+ Tùy vào mục đích sử dụng. Ví dụ điển hình là Singleton Pattern:
+ 
+ class A {
+  private:
+	static A instance;
+	A(){} // constructor
+ public:
+	static A& getInstance(){
+		return instance;
+	}
+ }
+ int main(){
+	A::getInstance() -> truy cập object của class A. 
+ }
+ 
+8.Constructor của lớp base class và derived class được gọi theo thứ tự nào?
+- Base class → Derived class
+
+9.Khi có thành viên const hoặc reference, tại sao ta phải khởi tạo chúng trong initializer list chứ không phải trong thân constructor?
+- Hiểu đơn giản là thành viên const và reference phải được định nghĩa ngay khi khai báo, mà trong thân 
+constructor thì đã khai báo xong rồi.
+
+10.Có thể ném exception trong constructor không? Điều gì xảy ra nếu có?
+
+ III. Copy Constructor và Assignment Operator
+
+1.Sự khác nhau giữa copy constructor và assignment operator là gì?
+	- Cú pháp: Copy constructor không trả về giá trị, còn assignment operator thì có.
+				
+	Copy constructor: 
+		Player(Player& source):data (source.data){}
+	Assignment operator:
+		Player& operator=(Player& source){
+			data = source.data;
+			return *this;
+		}
+	- Về định nghĩa: 
+		+ Copy constructor tạo 1 object mới từ 1 object trước đó với data giống hệt nhau.
+		
+		+ assignment operator sao chép giá trị từ object này sang 1 object khác đã có sẵn
+		
+2.Khi nào gọi copy constructor, khi nào gọi operator= ?
+    Player a(b);  // gọi copy constructor
+	Player a = b; // gọi copy constructor
+	
+	Player a,b;
+	a = b; // gọi operator assignment
+3.Nếu class có con trỏ nội bộ, tại sao ta cần định nghĩa copy constructor và operator= riêng?
+	
+4.Khi nào copy constructor được gọi “ngầm” (implicit call)?
+
+5.Thế nào là shallow copy và deep copy?
+
+6.Nếu copy constructor nhận tham số không phải reference, điều gì sẽ xảy ra?
+
+7.Sự khác nhau giữa:
+
+	MyClass a = b;  // Copy constructor
+	MyClass a(b);   // Copy constructor
+	
+	a = b;			// assignment operator
+
+
+8.Làm thế nào để ngăn việc copy một đối tượng?
+
+9.Trong C++11, copy constructor khác gì so với move constructor?
+
+10.Khi nào trình biên dịch bỏ qua việc gọi copy constructor (Return Value Optimization – RVO)?
+
+Hiện tượng thắt nút cổ chai do đâu ?
+
+Tại sao move constructor có noexcept ?
+
+IV. Destructor – Hủy đối tượng
+
+
+
+Destructor có thể overload được không?
+
+Destructor có thể có tham số không?
+
+Khi nào destructor được gọi?
+
+Thứ tự gọi destructor khi:
+
+	Đối tượng có thành viên là class khác
+
+	Đối tượng có kế thừa từ class khác
+	
+	Khi nào destructor nên khai báo là virtual?
+
+Nếu không khai báo destructor là virtual trong lớp base, chuyện gì xảy ra khi xóa qua con trỏ base trỏ tới derived?
+
+Có thể gọi destructor thủ công không? Khi nào nên hoặc không nên?
+
+Destructor có thể ném exception không? Tại sao điều đó nguy hiểm?
+
+Khi delete một con trỏ null, destructor có được gọi không?
+
+Điều gì xảy ra nếu destructor bị private? (gợi ý: Singleton pattern)
+
+ V. Nâng cao & Tình huống thực tế
+
+Khi có một class có thành viên con trỏ, hãy mô tả chu trình khởi tạo – sao chép – hủy của nó.
+
+Khi class có resource (file, socket, memory), bạn sẽ triển khai constructor/destructor như thế nào để tránh leak?
+
+Tại sao nên tuân thủ Rule of Three / Rule of Five trong C++?
+
+Trình biên dịch tự động tạo những hàm nào nếu bạn không định nghĩa gì cả?
+
+Sự khác nhau giữa:
+
+	Default constructor do compiler tạo
+
+	User-defined constructor rỗng
+
+C++11 giới thiệu move constructor và move assignment operator để làm gì?
+
+Khi nào destructor của biến toàn cục (global object) được gọi?
+
+Khi nào destructor của biến static local được gọi?
+
+Nếu một constructor gọi function mà function đó tạo ra exception, destructor nào được gọi, destructor nào không?
+
+Hãy giải thích trình tự gọi constructor và destructor trong chuỗi kế thừa (inheritance chain).
