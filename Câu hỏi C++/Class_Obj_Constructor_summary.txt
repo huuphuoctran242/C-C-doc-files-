@@ -86,6 +86,52 @@ lớn như chứa vector,....
 	Khi return object by value từ hàm (Từ C++ 11 trở lên nha) 
 	Khi container reallocate khi vượt quá size. 
 
+	- 	Về lý thuyết thì copy constructor tạo 1 object mới, copy data của object cũ vào object mới này.
+	Move constructor thì không copy mà là nhượng quyền sở hữu.(Tất nhiên là khi có tài nguyên như 
+	con trỏ, file,.. chứ nếu chỉ kiểu int,.. thì copy hay move cũng giống nhau thôi.
+
+-  Tức là với 1 class có cả con trỏ và biến int, thì vủng nhớ của con trỏ khi được move thì sẽ được
+nhượng quyền, còn data int sẽ dược copy.
+	
+- Về cú pháp thì khi đối tượng truyền vào là Rvalue thì sẽ gọi move constructor, còn LValue thì sẽ 
+gọi copy constructor. 
+
+	Player(const Player&);
+	Player(Player&&);
+	
+	class Data {
+	 public:
+		int value;
+		int* ptr;
+		Data(int val = 0, int* p =nullptr):value(val),ptr(p){}
+		// Copy constructor
+		Data(const Data& d){
+			value = d.value;
+			ptr = new int();
+			*ptr = *d.ptr;
+		hoặc có thể viết:
+			ptr = new int(*d.ptr);
+		}
+		
+		// Move constructor:
+		Data(Data&& source){
+			value = source.value;
+			ptr = source.ptr;
+			source.ptr = nullptr;
+		}
+
+		~Data(){
+			delete ptr;
+		}
+		
+int main(){
+	Data p1(10,new int(4));
+	Data p2 = std::move(p1);
+	cout<<p2.value<<" "<<*p2.ptr<<endl;
+}
+-> Với data không phải tài nguyên thì copy hay move cũng như nhau cả. 
+Muốn phân biệt thì cứ viết ví dụ này ra là hiểu nhé.
+
 - This pointer: 
 	+ chỉ sử dụng trong hàm thành viên của 1 class, sẽ trỏ đến đối tượng hiện tại của class.
 	+ Truy cập vào data và method của object. 

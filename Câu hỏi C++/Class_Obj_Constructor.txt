@@ -202,9 +202,9 @@ Hàm					Compiler có tự tạo không?	Khi nào không tạo
 Default constructor	✅ Có						Khi bạn định nghĩa bất kỳ constructor nào khác
 Copy constructor	✅ Có						Khi bạn định nghĩa copy/move constructor hoặc assignment
 Copy assignment		✅ Có						Khi bạn định nghĩa copy/move constructor hoặc assignment
-Move constructor	✅ Có (C++11+)				Khi có copy constructor hoặc destructor tự định nghĩa
-Move assignment		✅ Có (C++11+)				Khi có copy constructor hoặc destructor tự định nghĩa
-Destructor			✅ Có						Khi bạn định nghĩa destructor riêng
+Move constructor	✅ Có (C++11+)					Khi có copy constructor hoặc destructor tự định nghĩa
+Move assignment		✅ Có (C++11+)					Khi có copy constructor hoặc destructor tự định nghĩa
+Destructor		✅ Có						Khi bạn định nghĩa destructor riêng
  
 
 5. Nếu ta định nghĩa copy constructor thủ công, compiler còn tạo default constructor không?
@@ -280,33 +280,165 @@ constructor thì đã khai báo xong rồi.
 
 
 8.Làm thế nào để ngăn việc copy một đối tượng?
+- delete copy constructor và copy assignment
+
+class Player{
+ public:
+	Player(const Player&) = delete;
+	Player& operator=(const Player&) = delete;
+};
+
 
 9.Trong C++11, copy constructor khác gì so với move constructor?
+- 	Về lý thuyết thì copy constructor tạo 1 object mới, copy data của object cũ vào object mới này.
+	Move constructor thì không copy mà là nhượng quyền sở hữu.(Tất nhiên là khi có tài nguyên như 
+	con trỏ, file,.. chứ nếu chỉ kiểu int,.. thì copy hay move cũng giống nhau thôi.
+
+-  Tức là với 1 class có cả con trỏ và biến int, thì vủng nhớ của con trỏ khi được move thì sẽ được
+nhượng quyền, còn data int sẽ dược copy.
+	
+- Về cú pháp thì khi đối tượng truyền vào là Rvalue thì sẽ gọi move constructor, còn LValue thì sẽ 
+gọi copy constructor. 
+
+	Player(const Player&);
+	Player(Player&&);
+	
+	class Data {
+	 public:
+		int value;
+		int* ptr;
+		Data(int val = 0, int* p =nullptr):value(val),ptr(p){}
+		// Copy constructor
+		Data(const Data& d){
+			value = d.value;
+			ptr = new int();
+			*ptr = *d.ptr;
+		hoặc có thể viết:
+			ptr = new int(*d.ptr);
+		}
+		
+		// Move constructor:
+		Data(Data&& source) noexcept{
+			value = source.value;
+			ptr = source.ptr;
+			source.ptr = nullptr;
+		}
+
+		~Data(){
+			delete ptr;
+		}
+		
+int main(){
+	Data p1(10,new int(4));
+	Data p2 = std::move(p1);
+	cout<<p2.value<<" "<<*p2.ptr<<endl;
+}
+-> Với data không phải tài nguyên thì copy hay move cũng như nhau cả. 
+Muốn phân biệt thì cứ viết ví dụ này ra là hiểu nhé.
+
 
 10.Khi nào trình biên dịch bỏ qua việc gọi copy constructor (Return Value Optimization – RVO)?
 
-Hiện tượng thắt nút cổ chai do đâu ?
+11. Hiện tượng thắt nút cổ chai do đâu ?
+- Hiểu đơn giản là với các class có tài nguyên lớp như vector,... mà khi dùng copy constructor
+thì hiệu suất cho việc copy là rất lớn.
 
-Tại sao move constructor có noexcept ?
+12. Tại sao move constructor thường có noexcept ?
 
+- từ khóa noexcept cam kết hàm không ném ngoại lệ trong bất kỳ trường hợp nào.
+- Nếu move constructor không có noexcept thì các container sẽ fallback về copy constructor
+-> gây thắt nút cổ chai.
+
+Ví dụ: 
+class Data {
+	int val;
+ public:
+	Data(int val):val(val){};
+	Data(const Data& p):val(p.val){cout<<"copy constructor"<<endl;}
+	Data (Data&& p)noexcept :val(p.val) { cout<<"Move constructor"<<endl;}
+	
+};
+int main(){
+	std::vector<Data> v;
+	v.reserve(2);
+	v.emplace_back(Data(4));
+	v.emplace_back(Data(4));
+    v.emplace_back(Data(4));
+}
+
+
+- Nếu không có noexcept thì khi vector cần allocate lại bộ nhớ, nó sẽ gọi copy thay vì move
+Có noexcept: 
+	Move constructor
+	Move constructor
+	Move constructor
+	Move constructor
+	Move constructor
+	
+Không có noexcept:
+	Move constructor
+	Move constructor
+	Move constructor
+	copy constructor
+	copy constructor
+	
 IV. Destructor – Hủy đối tượng
 
 
+1. Destructor có thể overload được không?
+- Không 
 
-Destructor có thể overload được không?
+2. Destructor có thể có tham số không?
+- Không
 
-Destructor có thể có tham số không?
+3.Khi nào destructor được gọi?
+	- Khi object bị hủy.
+	- Khi delete cho object được gọi bằng new
+		Data* p = new Data();
+		delete p; -> Gọi destructor của Data.
+		
+4.Thứ tự gọi destructor khi:
 
-Khi nào destructor được gọi?
+	+ Đối tượng có thành viên là class khác
 
-Thứ tự gọi destructor khi:
-
-	Đối tượng có thành viên là class khác
-
-	Đối tượng có kế thừa từ class khác
+	+ Đối tượng có kế thừa từ class khác
 	
-	Khi nào destructor nên khai báo là virtual?
+- Đối tượng có thành viên là class khác:
+	class A{..};
+	class B{..};
+	class C{
+		A a;
+		B b;
+	}
+	int main(){
+	 C c;
+	}
 
+	-> Khi c out scope thì thứ tự destructor được gọi như sau: 
+	Destructor của C -> destructor của B -> destructor của A. Hủy đối tượng hiện tại trước 
+	rồi gọi hàm hủy ngược chiều khai báo của các đối tượng còn lại.
+	
+- Đối tượng có kế thừa từ class khác:
+	class Base {
+	public:
+		~Base() { cout << "Destructor Base\n"; }
+	};
+
+	class Derived : public Base {
+	public:
+		~Derived() { cout << "Destructor Derived\n"; }
+	};
+
+	int main() {
+		Derived d;
+}
+
+Thứ tự gọi:
+	Destructor Derived
+	Destructor Base
+
+5.Khi nào destructor nên khai báo là virtual?
+- 
 Nếu không khai báo destructor là virtual trong lớp base, chuyện gì xảy ra khi xóa qua con trỏ base trỏ tới derived?
 
 Có thể gọi destructor thủ công không? Khi nào nên hoặc không nên?
