@@ -1,0 +1,150 @@
+1. Khi nào nên sử dụng đa luồng (multi-threading) trong C++ thay vì lập trình tuần tự?
+→ (Kiểm tra hiểu biết về mục đích sử dụng: tăng hiệu năng, xử lý song song, phản hồi UI…)
+
+2. Lớp std::thread trong C++ hoạt động như thế nào? Nêu cách tạo và chạy một thread cơ bản.
+→ (Ví dụ: std::thread t(func, args...) và t.join() / t.detach().)
+
+3. Phân biệt giữa join() và detach() trong std::thread. Khi nào nên dùng mỗi cái?
+→ (Kiểm tra hiểu khái niệm joinable thread, detached thread, quản lý tài nguyên.)
+
+4. Giải thích khái niệm race condition. Đưa ra ví dụ ngắn về cách nó xảy ra trong C++.
+→ (Đánh giá khả năng nhận biết lỗi đồng bộ dữ liệu.)
+
+5. std::mutex là gì và được sử dụng để làm gì? Nêu ví dụ cơ bản khi hai thread cùng truy cập biến dùng chung.
+→ (Kiểm tra kỹ năng sử dụng mutex để tránh race condition.)
+
+6. Sự khác biệt giữa std::lock_guard và std::unique_lock là gì?
+→ (Kiểm tra hiểu biết về RAII và khả năng lock/unlock linh hoạt.)
+
+7. Tại sao cần std::condition_variable? Cách sử dụng nó kết hợp với std::unique_lock để đồng bộ giữa các thread?
+→ (Kiểm tra kiến thức sâu về signaling và cơ chế wait-notify.)
+
+8. Giải thích sự khác nhau giữa data parallelism và task parallelism trong lập trình đa luồng.
+→ (Kiểm tra hiểu khái niệm thiết kế luồng và tối ưu xử lý.)
+
+9. Điều gì xảy ra nếu bạn gọi join() hai lần trên cùng một thread hoặc quên gọi join()/detach() trước khi thread kết thúc scope?
+→ (Kiểm tra hiểu biết về quản lý vòng đời thread.)
+
+10. std::atomic khác gì so với dùng std::mutex để bảo vệ dữ liệu? Khi nào nên ưu tiên dùng std::atomic?
+→ (Kiểm tra kiến thức về atomic operations, lock-free programming.)
+
+NÂNG CAO
+Tuyệt vời 👍 Dưới đây là **10 câu hỏi nâng cao về Multi-threading trong C++**, tập trung vào các khái niệm hiện đại và kỹ thuật thực tế — giúp bạn hiểu sâu và chuẩn bị tốt cho phỏng vấn hoặc dự án thật.
+
+---
+
+### ⚙️ **CÂU HỎI MULTI-THREAD C++ – MỨC NÂNG CAO**
+
+**1.** `std::async` khác gì so với `std::thread`? Khi nào nên sử dụng `async` thay vì tạo thread thủ công?
+→ (Kiểm tra hiểu biết về future-based concurrency và lazy vs eager execution.)
+
+---
+
+**2.** Giải thích cơ chế hoạt động của `std::future` và `std::promise`. Chúng giúp luồng trao đổi dữ liệu với nhau như thế nào?
+→ (Kiểm tra hiểu về cơ chế đồng bộ kết quả giữa các thread.)
+
+---
+
+**3.** Deadlock là gì? Hãy nêu **4 điều kiện** cần để deadlock xảy ra và một cách để phòng tránh trong C++.
+→ (Kiểm tra hiểu lý thuyết + khả năng thực hành xử lý thứ tự lock hoặc dùng `std::scoped_lock`.)
+
+---
+
+**4.** `std::scoped_lock` khác gì với `std::lock_guard`? Tại sao nó giúp giảm nguy cơ deadlock khi lock nhiều mutex?
+→ (Kiểm tra hiểu về lock ordering và lock multiple mutex safely.)
+
+---
+
+**5.** Giải thích cách hoạt động của **thread pool** và lợi ích so với việc tạo thread mới mỗi lần.
+→ (Kiểm tra khả năng thiết kế hệ thống hiệu năng cao.)
+
+---
+
+**6.** C++ memory model định nghĩa điều gì trong bối cảnh multi-thread?
+→ (Kiểm tra hiểu biết về visibility, ordering, và data race theo chuẩn C++11 trở lên.)
+
+---
+
+**7.** Các hàm `std::memory_order_relaxed`, `acquire`, `release`, `seq_cst` trong `std::atomic` có ý nghĩa gì?
+→ (Kiểm tra hiểu sâu về atomic operations và memory ordering.)
+
+---
+
+**8.** Mô tả một ví dụ về **false sharing** và tại sao nó làm giảm hiệu năng trong lập trình đa luồng.
+→ (Kiểm tra kiến thức về cache line và performance tuning.)
+
+---
+
+**9.** Làm thế nào để thread an toàn khi ghi log hoặc ghi file từ nhiều luồng cùng lúc?
+→ (Kiểm tra thực tế: bảo vệ tài nguyên I/O, batching, lock, queue.)
+
+---
+
+**10.** Giả sử bạn có một hệ thống xử lý song song nhiều tác vụ độc lập, nhưng cần giới hạn chỉ chạy tối đa 4 thread cùng lúc. Bạn sẽ triển khai như thế nào?
+→ (Kiểm tra tư duy thiết kế thread pool hoặc semaphore hạn chế song song.)
+
+---
+
+Bạn có muốn tôi **kèm theo 10 đáp án ngắn gọn** (tóm tắt ý chính từng câu, chuẩn cho ôn thi hoặc phỏng vấn nhanh) không?
+Nếu đồng ý, tôi sẽ viết theo dạng:
+
+> “Câu 1 – Đáp án: … (2–3 dòng, đúng trọng tâm, dễ nhớ).”
+
+======================================================================
+
+1. Khi nào nên sử dụng đa luồng (multi-threading) trong C++ thay vì lập trình tuần tự?
+	- Khi cần các tác vụ cần chạy song song với nhau -> tăng hiệu suất.
+	
+2. Lớp std::thread trong C++ hoạt động như thế nào? Nêu cách tạo và chạy một thread cơ bản.
+→ (Ví dụ: std::thread t(func, args...) và t.join() / t.detach().)
+
+void printA(){
+ cout<<"PrintA"<<endl;
+}
+void printB(){
+ cout<<"PrintB"<<endl;
+}
+
+int main(){
+	std::thread t1(PrintA);
+	std::thread t2(PrintB);
+	
+	t1.join();
+	t2.join();
+}
+
+3. Phân biệt giữa join() và detach() trong std::thread. Khi nào nên dùng mỗi cái?
+→ (Kiểm tra hiểu khái niệm joinable thread, detached thread, quản lý tài nguyên.)
+
++ join(): Ví dụ ta có thread t1. Nếu trong main ta gọi t1.join(), thì nghĩa là thread main sẽ tạm thời dừng lại,
+		đợi đến khi thread t1 hoàn thành mới chạy tiếp main.
+		
++ detach(): t1 là 1 object của thread main dùng để quản lý luồng, khi ta gọi t1.detach() nghĩa là đối tượng t1 mất 
+		quyền kiểm soát nó. Khi này thread vẫn chạy trong nền, khi nó thực sự kết thúc thì hệ điều hành sẽ tự động
+		giải phóng tài nguyên. 
+	- Tuy nhiên có 2 điều cần lưu ý khi dùng detach():
+		+ Đảm bảo luồng chạy riêng chỉ truy cập vào dữ liệu sống lâu hơn nó.
+		+ Khi thread main kết thúc trước thì thread riêng cũng sẽ bị buộc dừng.
+
+=> Phải nhớ luôn gọi join() hoặc detach() trước khi thread bị hủy. Nếu không chương trình sẽ crash. 
+
+4. Giải thích khái niệm race condition. Đưa ra ví dụ ngắn về cách nó xảy ra trong C++.
+→ (Đánh giá khả năng nhận biết lỗi đồng bộ dữ liệu.)
+
+5. std::mutex là gì và được sử dụng để làm gì? Nêu ví dụ cơ bản khi hai thread cùng truy cập biến dùng chung.
+→ (Kiểm tra kỹ năng sử dụng mutex để tránh race condition.)
+
+6. Sự khác biệt giữa std::lock_guard và std::unique_lock là gì?
+→ (Kiểm tra hiểu biết về RAII và khả năng lock/unlock linh hoạt.)
+
+7. Tại sao cần std::condition_variable? Cách sử dụng nó kết hợp với std::unique_lock để đồng bộ giữa các thread?
+→ (Kiểm tra kiến thức sâu về signaling và cơ chế wait-notify.)
+
+8. Giải thích sự khác nhau giữa data parallelism và task parallelism trong lập trình đa luồng.
+→ (Kiểm tra hiểu khái niệm thiết kế luồng và tối ưu xử lý.)
+
+9. Điều gì xảy ra nếu bạn gọi join() hai lần trên cùng một thread hoặc quên gọi join()/detach() trước khi thread kết thúc scope?
+→ (Kiểm tra hiểu biết về quản lý vòng đời thread.)
+
+10. std::atomic khác gì so với dùng std::mutex để bảo vệ dữ liệu? Khi nào nên ưu tiên dùng std::atomic?
+→ (Kiểm tra kiến thức về atomic operations, lock-free programming.)

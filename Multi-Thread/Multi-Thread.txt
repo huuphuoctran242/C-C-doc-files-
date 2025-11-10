@@ -8,7 +8,6 @@
 				+ Global / static variable: các thread dùng chung các tài nguyên này.
 				+ Heap (dynamic memory) : các thread cũng dùng chung tài nguyên này.
 				+ Stack: KHÔNG CHIA SẺ, mỗi thread có stack riêng. 
-	
 	- Mối quan hệ giữa Core CPU và Threads:
 		+ Core CPU là 1 đơn vị xử lý độc lập của CPU, có đủ chức năng như 1 CPU như: ALU, register,..
 		+ Khi tạo 1 thread, hệ điều hành sẽ lên lịch thread đó trên 1 lõi của CPU.
@@ -17,31 +16,349 @@
 			- Nếu chỉ có 1 core, các thread sẽ chạy xen kẽ nhau.
 			- Nếu số core >= số thread thì các thread sẽ chạy song song thật sự.
 			- Nếu số core < số thread thì OS sẽ chạy xen kẽ.
-			
 2. Create Thread:
-
+ 
 	thread thread_name(callable);
-	
 	+ thread_name: là object của class thread.
 	+ callable: 
 		Function pointer
 		Lambda Expression
 		Function Object
 		Non-Static or static Member Function
-	
 3. Quản lý vòng đời của thread: 
 	- joinable(): kiểm tra xem thread có đang ở trạng thái hợp lệ để gọi join() hoặc detach() không.
-	
 	- thread_2.join(): Chờ thread_2 kết thúc. Ví dụ ta gọi lệnh này trong thread main().  
 		Nghĩa là nó sẽ block thread main() lại cho đến khi thread_2 chạy xong rồi mới chạy tiếp main.
 		Nói cách khác, khi 1 thread gọi join() nghĩa là nó sẽ bị block để nhường cho thread còn lại.
-		
 	- thread_2.detach(): Khi gọi thế này trong main thread, thì 2 thread sẽ chạy ngầm mà không chờ đợi 
 		nhau. Hệ điều hành sẽ tự động giải phóng tài nguyên khi thread_2 kết thúc.
-	
-		
+
 4. Getting Thread ID:
 	thread t1(task1);
 	cout<<t1.get_id();
+5. Quản lý tài nguyên trong thread: 
+	1. Mutex: Mutual Exclusion (loại trừ lẫn nhau)
+	#include <mutex>
+	std::mutex là 1 class triển khai mutex trong C++.
+	- Ta hiểu Mutex cơ bản như sau: 
+		+ Race condition: Khi 2 hay nhiều thread cùng lao vào sử dụng 1 tài nguyên chung (đọc/ghi)
+		-> Có thể gây ra những output không mong đợi.
+		+ Mutex sinh ra để giải quyết vấn đề này, bằng cách chỉ cho phép 1 thread sử dụng tài nguyên 
+		tại 1 thời điểm nhất định.
+		Mutex lock thread hiện tại để các thread khác không thể access vào tài nguyên.
+	- Syntax:
+		+ Tạo 1 object mutex: 
+			std::mutex obj_mutex;
+		+ Lock() and unlock() the thread: 
+			obj_mutex.lock();	
+			globalVar += 1;
+			doSomething();
+			obj_mutex.unlock();
+		Khối lệnh bên trong lock() và unlock() sẽ được bảo vệ, đảm bảo tại 1 thời điểm chỉ có thread hiện tại được
+		truy cập vào tài nguyên trong khối lệnh đó.
+ 
+	Ví dụ: 
+		mutex mtx;
+		int x = 0;
+		void increase(){
+			for(int i =0; i <1000;i++){
+				x++;
+			}
+		}
+		int main(){
+			thread t1(increase);
+			thread t2(increase);
+			t1.join();
+			t2.join();
+			cout<<x;
+		}
+	Như đoạn code trên không thread safe, vì x++ không phải là thao tác nguyên tử, mà gồm 3 bước đọc, tăng, ghi lại. 
+	Nếu 2 thread có thể x++ cùng lúc thì có thể xảy ra race condition.
+	Out put có thể sẽ không ra đúng 2000
+	Ví dụ đúng: cần thêm lock mutex để bảo vệ tài nguyên.
+		std::mutex mtx;
+		int x =0;
+		void increase(){
+			mtx.lock();
+			for(int i =0;i<1000;i++){
+				x++;
+			}
+			mtx.unlock();
+		}
+		int main(){
+		std::thread t1(increase);
+		std::thread t2(increase);
+		t1.join();
+		t2.join();
+		cout<<x;
+		}
+- Tuy nhiên std::mutex là đối tượng khóa cơ bản nhất, phải tự gọi lock() và unlock()
+	Nhược điểm: Không tự động giải phóng khóa trong mọi tình huống. Ví dụ như quên 
+	hoặc exception xảy ra. 
+	std::mutex mtx;
+	void doSomething(){
+		mtx.lock();
+		// Giả sử có exception xảy ra.
+		throw std::runtime_error("loi loi lol");
+		mtx.unlock();
+	}
++ Trong trường hợp này, câu lệnh mtx.unlock() sẽ không được gọi -> bị khóa vĩnh viễn (deadlock).
+Do đó ta sử dụng 2 kiểu mutex dưới đây:
+
+	2. std::unique_lock và std::lock_guard:
 	
-5. 
+	- std::lock_guard: đơn giản và chi phí thấp.
+	 + Tự động lock khi khởi tạo và unlock khi out of scope.
+	 + class lock_guard gọi unlock() trong destructor nên dù có exception thì vẫn tự động unlock. 
+	 Do đó có thể xử lý deadlock do exception.
+	int x =0;
+	std::mutex mtx;
+	void doSomething(){
+		std::lock_guard <std::mutex> lock(mtx);
+		x++;
+		// có exception
+		throw std::runtime_error("Lỗi xảy ra!");
+	}
+
+	- std::unique_lock: Phức tạp hơn và nhiều chức năng.
+	 + là 1 class trong thư viện mutex. Cung cấp nhiều tính năng hơn lock_guard, hữu ích trong nhiều
+	 tình huống phức tạp như:
+		- Tự động unlock khi ra khỏi scope -> tránh được deadlock
+		- có thể lock/unlock nhiều lần (lock_guard không làm được)
+		- trì hoãn việc log.(lock_guard không làm được)
+		- Cần chuyển quyền sở hữu.
+		- Sử dụng cùng với std::condition_variable
+		
+	+ syntax: 
+		std::mutex mtx;
+		std::unique_lock<std::mutex> lock(mtx); // khóa luôn ngay khi tạo
+		std::unique_lock<std::mutex> lock(mtx,std::defer_lock); // trì hoãn log, gọi lock.lock() để log.
+		lock.unlock() để mở. Có thể lock và unlock nhiều lần.
+		
+		std::mutex mtx;
+		int data = 0;
+		void worker(int id) {
+		std::unique_lock<std::mutex> lock(mtx, std::defer_lock); // chưa lock
+
+		// ---- Critical Section 1 ----
+		if(!lock.owns_lock())lock.lock();  // lock lần 1
+		std::cout << "Thread " << id << " reading data = " << data << "\n";
+		lock.unlock(); // unlock sau khi xong
+
+		// ---- Non-critical Section ----
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+		// ---- Critical Section 2 ----
+		lock.lock();  // lock lần 2
+		data += id;
+		std::cout << "Thread " << id << " updated data = " << data << "\n";
+		lock.unlock(); // unlock lại
+	}
+
+	int main() {
+		std::thread t1(worker, 1);
+		std::thread t2(worker, 2);
+		t1.join();
+		t2.join();
+		std::cout << "Final data: " << data << "\n";
+	}
+
+	+ để an toàn khi lock(), ta nên kiểm tra xem có đang giữ mutex không ?
+	
+		if(!lock.owns_lock()) lock.lock();
+		
+	+ Làm việc với std::condition_variable: Ta sẽ phân tích chi tiết ở phần conditon_variable
+	
+6. std::condition_variable:
+	+ Hiểu đơn giản thì thế này, các khóa mutex chỉ bảo vệ khối lệnh, tức là chỉ cho phép 1 thread
+	truy cập vào tài nguyên tại 1 thời điểm. Còn condition_variable thì giống như cách các thread 
+	có thể giao tiếp với nhau, theo kiểu A xong rồi B làm đi, B đợi A làm xong, A thông báo với B 
+	thì B mới làm. Kiểu như vậy.
+	
+	+ condition_variable có nhiệm vụ bắt thread B chờ cho đến khi thread A notified nó.
+	
+	+ Syntax:
+		#include <condition_variable>;
+		
+		std::condition_variable variable_name;
+	
+	Các function thường dùng:
+		wait(): Function này bắt thread hiện tại dừng lại cho đến khi condition_variable được notified.
+		
+		Nhưng cần đào sâu về function này.Việc gì sẽ xảy ra nếu threadA gọi wait() sau khi threadB đã notified?
+		Đây là trường hợp lost wakeup, 
+		
+				Syntax: 
+		std::mutex mtx;
+		std::condition_variable cv;
+		bool ready = false;
+		void waiting_thread(){
+			std::unique_lock<std::mutex> lock(mtx);
+			cv.wait(lock,[]{return ready;});
+				cout<<"Do task after ready"<<endl;
+		}
+		void set_ready_thread(){
+			{
+				std::lock_guard<std::mutex> lock(mtx);
+				ready = true;
+			}
+			cout<<"set ready to true"<<endl;
+			cv.notify_one();
+		}
+		int main(){
+			std::thread t1(waiting_thread);
+			std::thread t2(set_ready_thread);
+			t1.join();
+			t2.join();
+		}
+		Output: 
+		set ready to true
+		Do task after ready
+	+ Ta có các lưu ý sau:
+		- wait() phải nằm trong khóa mutex, vì nó có đọc và kiểm tra giá trị data chung.
+		- Phải dùng unique_lock với std::condition_variable.wait(), vì hàm wait này 
+		sẽ tạm thời unlock mutex để thread khác nhảy vào thay đổi điều kiện.
+		Chờ đến khi được nottify sẽ lock mutex lại để kiểm tra điều kiện. 
+		-> Nói cách khác thì cần unlock và lock nên không dùng lock_guard được mà phải
+		dùng unique_lock.
+	+ Trên đây là cách an toàn khi sử dụng wait(), đó là wait(lock, predicate). 
+	Nếu chỉ sử dụng wait(lock) có thể xảy ra trường hợp đánh thức giả, hoặc khi
+	bị notify trước khi wait được gọi thì sẽ thread gọi wait sẽ chờ mãi và notify
+	không có tác dụng.
+	+ Thay vào đó ta dùng wait(lock, predicate), thực tế hàm này sẽ kiểm tra điều kiện
+	trước, nếu điều kiện đã đúng thì không wait nữa, nếu chưa đúng thì tiếp tục wait.
+
+	7. std::atomic:
+	+ Mục đích sử dụng của atomic là giúp bạn truy cập và thay đổi biến dùng chung giữa
+	các thread một cách an toàn mà không cần dùng mutex.
+	+ Nó tránh data race bằng cách đảm bảo các thao tác trên biến đó là nguyên tử.
+	Nghĩa là:
+		khi sử dụng atomic, đảm bảo rằng tất cả các thao tác trên biến được thực hiện trọn 
+		vẹn trong 1 chu kì,không bị chia nhỏ.
+		ví dụ:
+		x không phải atomic:
+			x++ // đọc -> hiệu chỉnh -> ghi : 3 chu kì
+		x là atomic:
+			x++ (hoặc x.fetch_add(1); // đọc -> hiệu chỉnh -> ghi: 1 chu kì.
+	+ Syntax:
+	#include <thread>;
+	#include<atomic>;
+	std::atomic<int> x(0);
+	void increase_x(){
+		for (int i = 0; i < 1000;++i){
+			x.fetch_add(1); // hoặc x++;
+		}
+	}
+	int main(){
+		std::thread t1(increase_x);
+		std::thread t2 (increase_x);
+		t1.join();
+		t2.join();
+	}
+	+ Các function thông dụng: 
+		- Trước tiên phải biết là các biến atomic không sử dụng được với các toán thử thông 
+		thường: + - * / ,....
+		- Một số toán tử được sử dụng như: ++, +=, =,... vì chúng đã được overload rồi.
+		- Do đó khi dùng atomic ta phải sử dụng các toán tử sau:
+		std::atomic<int> x(0);
+		x.load()  -> đọc giá trị của x;
+		x.store(val) -> x = val;
+		x.fetch_add(val) -> x + val;
+		x.fetch_sub(val) -> x -val;
+		....
+	- Ngoài ra còn có cơ chế wait và notify giống condition variable:
+		x.wait(val) -> chờ đến khi giá trị khác val.
+		// Tuy nhiên wait này không có predicate nên phải kiểm tra điều kiện thủ công trước 
+		khi gọi bằng while để tránh lỗi tiềm ẩn thread bị đánh thức.
+		x.notify_one/ x.notify_all -> Đánh thức thread đang chờ ở trên.
+		Ví dụ:
+ 
+		std::atomic<bool> ready(false);
+		void waiting_thread(){
+			while(ready.load() == false) {
+				ready.wait(false);
+			}
+				cout<<"Do task after ready"<<endl;
+		}
+		void set_ready_thread(){
+				ready = true;
+			cout<<"set ready to true"<<endl;
+			ready.notify_one();
+		}
+		int main(){
+			std::thread t1(waiting_thread);
+			std::thread t2(set_ready_thread);
+			t1.join();
+			t2.join();
+		}
+ 
+7. std::this_thread::sleep_for :
+Cần include cả <thread> và <chrono>
+ 
+	- Lệnh này tạm dừng thực thi thread hiện tại trong 1 khoảng thời gian.
+	+ Syntax: 
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::second(1));
+ 
+	Các đơn vị thời gian có thể dùng.
+	std::chrono::seconds(n)
+	std::chrono::milliseconds(n)
+	std::chrono::microseconds(n)
+	std::chrono::nanoseconds(n)
+8. Hàm std::thread::hardware_concurrency()
+ 
+trong C++ là một tiện ích giúp bạn biết được số lượng luồng phần cứng (hardware threads) 
+mà hệ thống hiện tại có thể hỗ trợ — thường tương ứng với số lượng logical CPU cores.
+ 
+#include <chrono>
+#include <iostream>
+#include <thread>
+using namespace std;
+ 
+int main()
+{
+    unsigned int con_threads;
+ 
+    // calculating number of concurrent threads
+    // supported in the hardware implementation
+    con_threads = thread::hardware_concurrency();
+ 
+    cout << "Number of concurrent threads supported are: "
+<< con_threads << endl;
+ 
+    return 0;
+}
+
+9. std::thread::get_id()
+
+Syntax:	thread_name.get_id();
+
+Lấy id của thread.
+
+void sleepThread()
+{
+    this_thread::sleep_for(chrono::seconds(1));
+}
+
+int main()
+{
+    // creating thread1 and thread2
+
+    thread thread1(sleepThread);
+    thread thread2(sleepThread);
+
+    thread::id t1_id = thread1.get_id();
+    thread::id t2_id = thread2.get_id();
+
+    cout << "ID associated with thread1= "
+         << t1_id << endl;
+    cout << "ID associated with thread2= "
+         << t2_id << endl;
+
+    thread1.join();
+    thread2.join();
+
+    return 0;
+}
+
+9. semaphore
