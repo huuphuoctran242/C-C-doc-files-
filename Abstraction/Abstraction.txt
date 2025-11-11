@@ -1,0 +1,64 @@
+ I. Abstraction trong OOP
+ 
+ 1. Định nghĩa: 
+	+ Abstraction có ý nghĩa là trừu tượng hóa, là quá trình ẩn đi chi tiết cài đặt phức tạp mà chỉ
+	hiển thị phần cần thiết cho người dùng.
+	+ Nói cách khác nghĩa là chỉ quan tâm what it does chứ không phải how it does.
+	+ Ví dụ như chìa cái vô lăng ra thì mình chỉ cần biết dùng nó để lái thôi, nhưng thực chất khi 
+	rẽ trái thì các cơ cấu phía trong ô tô làm những gì để rẽ trái thì hoàn toàn không cần biết.
+	
+2. Mục đích:
+	+ Giảm độ phức tạp hệ thống.
+	+ Tách biệt mô tả hành vi (interface) và implementation.
+	-> Dễ dàng thay dổi và mở rộng: Chỉ cần update phần implementation, giữ nguyên interface.
+	
+3. Cách thực hiện: 
+	+ Dùng abstract class hoặc interface để che dấu logic thực thi.
+	
+4. So sánh giữa Abstraction và Encapsulation:
+	+ Mục đích: Trừu tượng ẩn đi chi tiết logic hoạt động.
+				Đóng gói ẩn và bảo vệ dữ liệu nội bộ.
+	+ Thực hiện: Trừu tượng thực hiện bằng abstract class, vitual method
+				 Đóng gói thực hiện bằng access modifier: private, protected, public.
+
+II. Virtual Method: 
+1. Virtual Method:
+	+ Virtual method (hàm ảo) là một thành viên trong class được khai báo virtual.
+	-> Nghĩa là hàm này cho phép ghi đè (override) ở các class con và quyết định
+	hành vi được thực thi ở runtime (thay vì compile time)
+	
+	+ Từ đây có thể thấy abstraction có mối quan hệ chặt chẽ với polymorphism sẽ được đi chi tiết sau. 
+	
+2. Ví dụ cách triển khai: 
+	class Animal {
+	 public:
+		virtual void make_sound(){
+			cout<<" Animals's sound"<<endl;
+		}
+	};
+	class Cat : public Animal {
+	 public:
+		void make_sound () override {
+			cout<<"Meo Meo"<<endl;
+		}
+	};
+	
+	class Dog: public Animal {
+	 public:
+		void make_sound() override {
+			cout<<" Go Go"<<endl;
+		}
+	};
+	
+	int main(){
+		Animal* ptr1 = new Cat();
+		Animal* ptr2 = new Dog();
+		ptr1->make_sound();
+		ptr2->make_sound();
+	}
+	
+3. Nếu không có virtual:
+	+ thì khi gọi Animal* ptr1 = new Cat(); hay Animal* ptr2 = new Dog(); thì kết quả vẫn gọi make_sound
+	của class cha dù đối tượng cấp phát động là Cat hay Dog.
+
+4. Cơ chế của Vtable ( sẽ đi chi tiết ở phần đa hình)
