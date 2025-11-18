@@ -1,0 +1,72 @@
+
+
+✅10 câu hỏi trọng tâm về Abstraction trong C++**
+
+1. Abstraction trong C++ là gì và mục tiêu của nó là gì?**
+
+→ Bạn cần hiểu abstraction giúp *ẩn chi tiết, lộ giao diện*, tạo code sạch, dễ mở rộng.
+
+---
+
+2. Sự khác nhau giữa abstraction và encapsulation là gì?**
+
+→ Rất nhiều người nhầm lẫn. Phải phân biệt rõ:
+
+* Encapsulation: “bọc dữ liệu”
+* Abstraction: “ẩn chi tiết, lộ bản chất”
+
+---
+
+3. Virtual function là gì và được dùng khi nào?**
+
+→ Virtual function là nền tảng của abstraction + polymorphism.
+
+---
+
+4. Pure virtual function khác gì virtual function bình thường?**
+
+→ Pure virtual = không có implementation → tạo lớp trừu tượng.
+
+---
+
+5. Abstract class là gì và dùng khi nào?**
+
+→ Một lớp không thể tạo object → dùng để định nghĩa hành vi chung cho subclass.
+
+---
+
+6. Interface trong C++ là gì và khác gì abstract class?**
+
+→ Interface = abstract class chứa toàn bộ pure virtual functions.
+
+---
+
+7. Tại sao pure virtual destructor vẫn phải có implementation?**
+
+→ Câu này tinh tế, nhiều người sai → liên quan đến quá trình hủy object đa hình.
+
+---
+
+8. Cơ chế override hoạt động ra sao khi gọi hàm qua con trỏ base class?**
+
+→ Hiểu rõ vtable, dynamic dispatch → bản chất của abstraction.
+
+---
+
+9. Khi nào nên dùng abstract class thay vì interface, và ngược lại?**
+
+→ Giúp quyết định thiết kế đúng: dùng contract hay dùng mô hình base class + logic chung.
+
+---
+
+10. Abstraction giúp giảm phụ thuộc (loose coupling) như thế nào?**
+
+→ Đây là mục đích cuối cùng của abstraction:
+
+* thay đổi, mở rộng dễ
+* mô-đun hóa
+* code dễ test
+* dễ thay thế implementation
+
+
+====================================================================================

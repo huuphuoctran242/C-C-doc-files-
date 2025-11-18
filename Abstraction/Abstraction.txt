@@ -22,19 +22,73 @@
 				 Đóng gói thực hiện bằng access modifier: private, protected, public.
 
 II. Virtual Method: 
-1. Virtual Method:
-	+ Virtual method (hàm ảo) là một thành viên trong class được khai báo virtual.
-	-> Nghĩa là hàm này cho phép ghi đè (override) ở các class con và quyết định
-	hành vi được thực thi ở runtime (thay vì compile time)
-	
-	+ Từ đây có thể thấy abstraction có mối quan hệ chặt chẽ với polymorphism sẽ được đi chi tiết sau. 
-	
-2. Ví dụ cách triển khai: 
-	class Animal {
-	 public:
-		virtual void make_sound(){
-			cout<<" Animals's sound"<<endl;
+	1. Virtual Method:
+		+ Virtual method (hàm ảo) là một thành viên trong class được khai báo virtual.
+		-> Nghĩa là hàm này cho phép ghi đè (override) ở các class con và quyết định
+		hành vi được thực thi ở runtime (thay vì compile time)
+		
+		+ Từ đây có thể thấy abstraction có mối quan hệ chặt chẽ với polymorphism sẽ được đi chi tiết sau. 
+		
+	2. Ví dụ cách triển khai: 
+		class Animal {
+		 public:
+			virtual void make_sound(){
+				cout<<" Animals's sound"<<endl;
+			}
+		};
+		class Cat : public Animal {
+		 public:
+			void make_sound () override {
+				cout<<"Meo Meo"<<endl;
+			}
+		};
+		
+		class Dog: public Animal {
+		 public:
+			void make_sound() override {
+				cout<<" Go Go"<<endl;
+			}
+		};
+		
+		int main(){
+			Animal* ptr1 = new Cat();
+			Animal* ptr2 = new Dog();
+			ptr1->make_sound();
+			ptr2->make_sound();
+			delete ptr1;
+			delete ptr2;
 		}
+		
+	3. Nếu không có virtual:
+		+ xảy ra static binding -> gọi phương thức lớp cha.
+		+ thì khi gọi Animal* ptr1 = new Cat(); hay Animal* ptr2 = new Dog(); thì kết quả vẫn gọi make_sound
+		của class cha dù đối tượng cấp phát động là Cat hay Dog.
+
+	4. Cơ chế của Vtable ( sẽ đi chi tiết ở phần đa hình)
+		+ Khi có ít nhất 1 virtual method trong class, mỗi class sẽ có vtable chứa địa chỉ của các hàm ảo.
+		+ Mỗi object sẽ có 1 vptr trỏ đến vtable của class đó.
+		+ Ví dụ như trong ví dụ trên, khi gọi ptr1->make_sound() thì vptr của ptr1 sẽ tra cứu trong vtable
+		của class Cat để gọi đúng method.
+		-> Chi tiết sẽ được trình bày chi tiết trong phần kế thừa.
+	
+	5. Virtual destructor:
+		- Là destructor được khai báo virtual ở lớp cha.
+		-> Đảm bảo khi xóa đối tượng qua con trỏ lớp cha, destructor của lớp con cũng sẽ được gọi.
+		Tuy nhiên cần phân định rõ là khi gọi delete ptr1; thì vùng nhớ trên heap vẫn luôn được giải 
+		phóng dù có có virtual destructor hay không. Virtual destructor chỉ đảm bảo rằng destructor của lớp 
+		con sẽ luôn được gọi để giải phóng các tài nguyên của lớp con.
+		
+III. Pure virtual method:
+	- Là một hàm ảo không có phần thân trong lớp cha. Chỉ định nghĩa hành vi chứ không phải cách làm.
+	-> Bắt buộc các lớp con phải override lại nó.
+	
+	- Syntax: 
+		virtual void functionName() = 0;
+	- Ví dụ điển hình:
+		class Animal {
+	 public:
+		virtual void make_sound() = 0;
+
 	};
 	class Cat : public Animal {
 	 public:
@@ -54,11 +108,64 @@ II. Virtual Method:
 		Animal* ptr1 = new Cat();
 		Animal* ptr2 = new Dog();
 		ptr1->make_sound();
-		ptr2->make_sound();
-	}
+        ptr2->make_sound();
+        delete ptr1;
+        delete ptr2;
+    }
 	
-3. Nếu không có virtual:
-	+ thì khi gọi Animal* ptr1 = new Cat(); hay Animal* ptr2 = new Dog(); thì kết quả vẫn gọi make_sound
-	của class cha dù đối tượng cấp phát động là Cat hay Dog.
+	- Class chứa pure virtual method -> Abstract Class
+		-> không thể tạo object từ abstract class.
+		
+	- Nếu không có class con nào override -> Lỗi biên dịch.
+	
+	- Một abstract class vẫn có thể chứa các method thông thường.
+	
+	- Trường hợp đặc biệt: Pure virtual destructor.
+		+ Mục đích của nó là biến class thành abstract class
+		+ Tuy có khai báo pure virtual nhưng vẫn phải có implementation vì khi delete ptr1 bắt buộc gọi đến
+		destructor lớp cha.
+		
+		class Plugin {
+			public:
+				virtual void run() = 0;        // Lớp con phải implement
+				virtual ~Plugin() = 0;         // Pure virtual destructor
+			};
 
-4. Cơ chế của Vtable ( sẽ đi chi tiết ở phần đa hình)
+			Plugin::~Plugin() {                // BẮT BUỘC phải có body
+				std::cout << "Destroying Plugin base...\n";
+			}
+
+			class AudioPlugin : public Plugin {
+			public:
+				void run() override { std::cout << "Audio running\n"; }
+				~AudioPlugin() { std::cout << "Destroying Audio\n"; }
+			};
+
+			int main() {
+				Plugin* p = new AudioPlugin();
+				delete p;
+			}
+IV. Abstract class
+	- Abstract class là class có ít nhất 1 hàm thuần ảo (pure virtual method) hoặc có pure virtual destructor.
+	
+	- Không thể tạo object trưc tiếp từ abstract class. Có thể tạo con trỏ kiểu abstract class sau đó ép sang kiểu 
+	của lớp dẫn xuất. 
+	
+	- Abstract class rất linh hoạt, nó có thể chứa
+		+ Pure virtual method
+		+ virtual method có body
+		+ method bình thường
+		+ biến thành viên
+		+ constructor/ destructor
+
+V. Interface: 
+	Interface trong C++ = abstract class chứa toàn bộ pure virtual functions.
+
+	Dùng để định nghĩa contract cho các lớp.
+
+	Không chứa implementation.
+
+	Cho phép multiple inheritance mà an toàn.
+
+	Rất hữu ích trong kiến trúc sạch, design pattern, viết API, plugin, testing.
+	
