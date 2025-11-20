@@ -1,0 +1,304 @@
+Dưới đây là **checklist học Polymorphism (tính đa hình) trong C++** được thiết kế như một **lộ trình giảng dạy chuyên sâu**, giúp bạn hiểu từ bản chất → thực hành → áp dụng vào dự án thực tế.
+
+---
+
+# ✅ **CHECKLIST HỌC POLYMORPHISM TRONG C++ (ĐẦY ĐỦ – KHOA HỌC – CHUYÊN SÂU)**
+
+## **PHẦN A — NỀN TẢNG CẦN NẮM TRƯỚC (Prerequisites)**
+
+1. Kiến thức OOP cơ bản**
+
+* Class, object – cơ chế hoạt động bộ nhớ
+* Access modifiers: public, private, protected
+* Constructor, destructor cơ bản (chưa cần virtual)
+
+2. Con trỏ & tham chiếu trong C++**
+
+* Con trỏ cơ bản, dereference
+* Con trỏ đến object
+* Tham chiếu (reference) và reference binding
+* Sự khác nhau: pointer vs reference
+
+---
+
+# **PHẦN B — POLYMORPHISM TĨNH (COMPILE-TIME / STATIC POLYMORPHISM)**
+
+> Dạng đa hình không dùng virtual – compiler quyết định.
+
+3. Function Overloading**
+
+* Định nghĩa & nguyên lý
+* Các quy tắc overload: số lượng tham số, kiểu, thứ tự
+* Quy tắc **không** overload theo giá trị trả về
+* Ambiguous overload – lỗi mơ hồ
+
+4. Operator Overloading**
+
+* Toán tử nào overload được, toán tử nào không
+* Overload theo dạng member vs non-member
+* Best practice khi overload: `operator<<`, toán tử so sánh, toán tử số học
+* Quy tắc an toàn khi overload
+
+---
+
+# **PHẦN C — POLYMORPHISM ĐỘNG (RUNTIME POLYMORPHISM)**
+
+> Phần quan trọng nhất – cốt lõi của OOP C++.
+
+5. Hiểu bản chất “Runtime Dispatch”**
+
+* Lời gọi hàm ảo được quyết định ở runtime
+* Vai trò của con trỏ/ reference đến base class
+* Tránh hiểu sai: object slicing
+
+6. Virtual Function (Hàm ảo)**
+
+* Cách khai báo `virtual`
+* Cơ chế hoạt động: vTable – vPtr
+* Override chuẩn (C++11): dùng từ khóa `override`
+* Hidden vs override: khác nhau thế nào
+* Final override (`final`) – khi nào dùng
+
+7. Pure Virtual Function & Abstract Class**
+
+* Định nghĩa class trừu tượng
+* Pure virtual (`= 0`) hoạt động thế nào
+* Tạo interface bằng abstract class
+* Quy tắc kế thừa interface trong C++
+
+8. Virtual Destructor**
+
+* Khi nào destructor cần virtual
+* Object bị delete qua con trỏ base nếu không có virtual → lỗi gì
+* Pure virtual destructor – tại sao tồn tại
+* Triển khai pure virtual destructor đúng chuẩn
+
+---
+
+# **PHẦN D — CƠ CHẾ NÂNG CAO CỦA ĐA HÌNH**
+
+9. Covariant Return Types (kiểu trả về đồng biến)**
+
+* Base::func() trả về Base*
+* Derived::func() có thể trả về Derived*
+* Khi nào nên dùng
+
+10. Virtual Table nâng cao**
+
+* Từng object thật sự chứa gì
+* Vtable nằm ở đâu trong bộ nhớ
+* Gọi hàm ảo với nhiều cấp kế thừa
+* Chi phí runtime của hàm ảo
+
+11. Multiple Inheritance & Polymorphism**
+
+* Diamond problem & virtual inheritance
+* Vtable trong multiple inheritance hoạt động ra sao
+* Khi nào không nên dùng
+
+12. Polymorphism & Templates**
+
+* Static polymorphism qua CRTP
+* So sánh: virtual (runtime) vs template (compile-time)
+* Khi nào chọn cái nào
+
+---
+
+# **PHẦN E — THỰC HÀNH MỨC CAO**
+
+13. Bài tập thực thi đa hình**
+
+* Tạo hierarchy động vật: Dog, Cat, Bird
+* Thêm abstract class ISerializable
+* Sử dụng mảng con trỏ base để quản lý nhiều đối tượng
+
+14. Ứng dụng vào dự án nhỏ**
+
+* Bộ engine xử lý shape: Circle, Rect, Triangle
+* Dùng polymorphism để render
+* Destructor phải virtual
+* Dùng abstract class để tạo plugin interface
+
+15. Debug & tư duy chuyên sâu**
+
+* Dùng debugger xem vtable pointer
+* Kiểm tra kích thước object: sizeof với virtual vs không virtual
+* Thử xóa object qua con trỏ base + có hoặc không `virtual` để thấy lỗi
+
+---
+
+# **PHẦN F — CÂU HỎI KIỂM TRA KIẾN THỨC**
+
+16. Bộ câu hỏi chuẩn senior-level**
+
+* Virtual function hoạt động thế nào trong bộ nhớ?
+* Khi nào destructor phải là virtual?
+* Pure virtual destructor là gì?
+* Sự khác biệt giữa override và overloading?
+* Object slicing là gì?
+* Tại sao pointer/reference đến base mới dùng được polymorphism?
+* Covariant return type dùng để làm gì?
+* So sánh interface Java vs abstract class C++?
+* Chi phí khi dùng virtual function là gì?
+* Template có phải là polymorphism không?
+
+---
+
+# Nếu bạn muốn, mình có thể tiếp tục:
+
+✅ Triển khai từng mục theo phong cách giảng dạy chi tiết
+✅ Viết code mẫu minh hoạ cho từng mục
+✅ Tạo 50 bài tập luyện đa hình từ dễ → khó
+Bạn muốn đi vào mục nào trước?
+
+
+
+1. Định nghĩa: 
+	+ Đa hình trong OOP là đặc tính cho phép 1 phương thức hoặc hành vi có thể hoạt động theo nhiều cách khác nhau
+	tùy thuộc vào đối tượng thực thi. 
+	
+	+ Ví dụ một người đàn ông có thể là nhân viên, cũng có thể là cha, là chồng,....
+	
+	+ Đa hình có 2 loại, đa hình run-time và đa hình compile time.
+	
+2. POLYMOPHISM TĨNH - COMPILE TIME
+	
+	+ Là đa hình quyết định ở compile time. Compiler sẽ gọi đúng hàm để gọi khi biên dịch.
+	
+	+ Có 2 dạng chính: 
+		- Function overloading
+		- Operator overloading 
+	 
+	2.1 Function Overloading: 
+		+ Là các hàm cùng tên nhưng khác danh sách tham số.
+		+ Compiler sẽ dựa trên: số lượng, kiểu và thứ tự tham số để chọn đúng hàm.
+		+ Compiler không phân biệt dựa trên giá trị trả về. 
+		Chỗ này cần miêu tả kĩ, tức là 2 function overloading thực tế có thể có kiểu trả về 
+		khác nhau, tuy nhiên thì nó phải có tham số khác nhau. Nếu tham số giống hệt nhau mà 
+		trả về kiểu khác nhau thì không được coi là overload.
+		
+		Ví dụ: 
+			int foo(int x);
+			double foo(double x); //ok
+			double foo (int x); // error
+		
+		+ Lưu ý khi sử dụng: 
+			- Tránh lỗi mơ hồ bằng cách ép kiểu rõ ràng.
+	
+	2.2. Operator Overloading
+		+ Hầu hết các toán tử đều có thể overload, ngoại trừ: 
+		
+		. -> Toán tử truy cập thành viên class.
+		
+		.* -> Pointer to member operator: truy cập con trỏ trỏ đến thành viên của class.			 
+			struct MyStruct {
+				int x;
+			};
+			int main() {
+				MyStruct obj{42};
+				int MyStruct::*ptr = &MyStruct::x; // con trỏ đến member x
+				cout << obj.*ptr << endl; // Output: 42
+			}
+
+		? : -> Toán tử 3 ngôi
+		
+		:: -> Toán tử phân giải phạm vi
+		
+		sizeof
+		
+		typeid 
+	
+		+ Có 2 loại operator overloading đó là Member và None-member operator. 
+		  Hiểu đơn giản là 1 loại là member của class, loại còn lại thì không. 
+		  Dựa vào các điều kiện sau ta sẽ quyết định xem toán tử ta muốn overload 
+		  nên là loại nào:
+		  
+		  - Member operator: Định nghĩa trong class, nhận this + tham số nếu cần.
+		  - None-member operator: hàm độc lập, thường friend nếu cần truy cập biến private, protected.
+		  
+		  - Trả về tham chiếu &: 
+			Thường dùng với toán tử dạng gán vào đối tượng hiện tại, thay đổi chính this:
+				=, +=, -=, ++ x, --, [], <<(cái này đặc biệt nha)
+		
+		  Trả về tham trị: 
+			Dùng khi tạo giá trị mới không phải sửa bản gốc:
+				+, -, *, /, x++
+				
+		Thực hành viết overload toán tử: <<, các toán tử số học, toán tử o sánh
+		
+		class Vector {
+		 private:
+			int x;
+			int y;
+		 public:
+			Vector(int x = 0,int y = 0): x(x),y(y){}
+			Vector(const Vector& source):x(source.x),y(source.y){
+				cout<<"Call copy constructor "<<endl;
+			}
+			// Overload operator=
+			Vector& operator=(const Vector& source){
+				cout<<"Call overload operator = "<<endl;
+				x = source.x;
+				y = source.y;
+				return *this;
+			}
+			//Overload operator + (member)
+			Vector operator+(const Vector& a) const{
+				cout<<"Overload + "<<endl;
+				Vector tmp(this->x + a.x, this->y+a.y);
+				return tmp;
+				
+			}
+			 //Overload operator + (none member)
+			// friend Vector operator+(const Vector& a, const Vector& b){
+			//     cout<<"Overload + (none member) "<<endl;
+			//     Vector tmp(a.x +b.x,a.y+b.y);
+			//     return tmp;
+			// }
+			
+			//Overload operator+=
+			Vector& operator+=(const Vector& a ){
+				cout<<"Overload += "<<endl;
+				this->x +=a.x;
+				this->y +=a.y;
+				return *this;
+			}
+			friend void Print(Vector& a){
+				cout<<"x = "<<a.x<<"; y = "<<a.y<<endl;
+			}
+			friend ostream& operator<<(ostream& os, Vector& a){
+				os<<"x : "<<a.x<<" ; y = "<<a.y<<endl;
+				return os;
+			}
+			friend istream& operator>>(istream& is, Vector& a){
+				is>>a.x>>a.y;
+				return is;
+			}
+		};
+		int main(){
+			Vector a;
+			cin>>a;
+			cout<<a;
+			Vector b=a;//Copy constructor
+			Vector c;
+			c =b+a; //b.operator+(a) or operator+(a,b) sau đó c.operator=(tmp)
+			c+=a; //c.operator+=(a);
+			Print(c);
+			cout<<c;
+		}
+	
+	- Ta nên viết triển khai trước để quyết định viết hàm overload như thế nào.
+	Ví dụ:
+	a+ b -> a.operator+(b) -> Vector operator+(const Vector& b){
+								  Vector tmp (this->x +b.x, this->y+b.y);
+								  return tmp;
+							  }
+	a+b -> operator+(a,b) -> friend Vector operator+(const Vector&a,const Vector&b){
+								Vector tmp(a.x + b.x, a.y+b.y);
+								return tmp;
+							 }
+	c=b -> c.operator=(b) -> Vector& operator=(const Vector& b){
+								this->x = b.x;
+								this->y = b.y;
+								return *this;
+								}
