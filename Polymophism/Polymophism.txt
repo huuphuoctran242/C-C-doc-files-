@@ -263,6 +263,9 @@ Bạn muốn đi vào mục nào trước?
 				this->y +=a.y;
 				return *this;
 			}
+			bool operator==(const Vector& a){
+				return(this->x == a.x && this->y == a.y);
+			}
 			friend void Print(Vector& a){
 				cout<<"x = "<<a.x<<"; y = "<<a.y<<endl;
 			}
@@ -273,6 +276,9 @@ Bạn muốn đi vào mục nào trước?
 			friend istream& operator>>(istream& is, Vector& a){
 				is>>a.x>>a.y;
 				return is;
+			}
+			friend bool operator==(const Vector& a, const Vector& b){
+				return (a.x == b.x && a.y==b.y);
 			}
 		};
 		int main(){
@@ -302,3 +308,324 @@ Bạn muốn đi vào mục nào trước?
 								this->y = b.y;
 								return *this;
 								}
+								
+=============================================================================================
+ĐA HÌNH RUNTIME
+
+1. Bản chất của Runtime Dispatch:
+	- Runtime Dispatch: quyết định hàm nào được gọi ở thời điểm runtime. 
+	- Xảy ra khi gọi hàm ảo thông qua con trỏ hoặc reference của lớp Base. 
+	-> Ta có thể viết mã xử lý chung thông qua interface hay base type mà hành vi thực tế 
+	sẽ phụ thuộc vào Object thật của lớp Dẫn xuất.
+
+Dưới đây là **bản mô tả tuần tự – mạch lạc – logic** toàn bộ quá trình runtime polymorphism trong C++, dùng để làm **tài liệu chuẩn**.
+(Đây là phiên bản rõ ràng nhất theo trình tự thời gian của hệ thống.)
+
+---
+
+# 📘 **TOÀN BỘ QUÁ TRÌNH RUNTIME POLYMORPHISM TRONG C++ – MÔ TẢ TUẦN TỰ**
+
+---
+
+## **1. Compiler biên dịch mã nguồn → sinh mã máy + cấu trúc hỗ trợ đa hình**
+
+Khi bạn compile chương trình C++:
+
+### **1.1 Compiler tạo mã máy cho từng hàm**
+
+* Tất cả hàm (kể cả virtual) đều được compile thành mã máy.
+* Mỗi hàm có *địa chỉ cố định* trong binary.
+
+### **1.2 Compiler tạo vTable cho mỗi class có virtual function**
+
+Với mỗi class chứa virtual function:
+
+```
+class Base
+class Derived
+```
+
+Compiler tạo:
+
+* Một **vTable** chứa danh sách các **con trỏ hàm** (function pointers)
+* Mỗi vTable là **duy nhất** cho từng class
+* Entry tương ứng với thứ tự khai báo các hàm ảo
+
+Ví dụ:
+
+```
+Base::vTable:
+    [pointer -> Base::f]
+    [pointer -> Base::g]
+
+Derived::vTable:
+    [pointer -> Derived::f]
+    [pointer -> Derived::g]
+```
+
+### **1.3 Compiler thêm vPtr vào object layout**
+
+Nếu class có virtual function → compiler thêm **vPtr** ở đầu object:
+
+```
+[ vPtr ]      --> pointer đến vTable
+[ member x ]
+[ member y ]
+```
+
+→ vPtr không phải code bạn viết — compiler tự thêm.
+
+---
+
+## **2. Linker hoàn thiện chương trình → tạo file executable**
+
+Linker sẽ:
+
+* Gộp code máy
+* Gộp vTable vào RODATA segment
+* Gán địa chỉ thực cho vTable và các hàm
+
+---
+
+## **3. OS loader nạp chương trình vào RAM**
+
+Khi chạy file thực thi:
+
+### **3.1 OS nạp các segment vào RAM**
+
+* **.text** → mã máy của hàm
+* **.rodata** → vTables
+* **.data / .bss** → biến global
+* **heap** → cấp phát động
+* **stack** → địa phương & return addresses
+
+### **3.2 CPU bắt đầu chạy tại hàm `main()`**
+
+---
+
+## **4. Tạo object → constructor gán vPtr**
+
+Khi bạn viết:
+
+```cpp
+Base* p = new Derived();
+```
+
+### **4.1 Cấp phát object trên heap**
+
+Heap cấp 1 block memory chứa:
+
+```
+[ vPtr ]
+[ member variables của Derived ]
+```
+
+### **4.2 Constructor của Derived chạy**
+
+Compiler tự thêm code:
+
+```
+this->vPtr = &Derived::vTable;
+```
+
+→ Đây là bước cực kỳ quan trọng:
+**Object nào thuộc class nào → vPtr trỏ đến đúng vTable của class đó.**
+
+---
+
+## **5. Gọi hàm ảo (runtime dispatch)**
+
+Khi gọi:
+
+```cpp
+p->f();
+```
+
+Trong khi **p là `Base*` nhưng object thật là `Derived`**.
+
+### CPU thực hiện:
+
+### **Bước 1 — Lấy con trỏ `p`**
+
+```asm
+mov rax, [p]
+```
+
+### **Bước 2 — Đọc vPtr trong object**
+
+```asm
+mov rcx, [rax]      ; rcx = vPtr
+```
+
+### **Bước 3 — Truy cập entry tương ứng trong vTable**
+
+```asm
+mov rdx, [rcx + OFFSET]    ; OFFSET = vị trí của hàm f trong bảng
+```
+
+### **Bước 4 — CALL đến hàm override**
+
+```asm
+call rdx
+```
+
+➜ Nếu object thật là **Derived**, vPtr trỏ đến **Derived::vTable**,
+nên CPU sẽ gọi **Derived::f()**.
+
+→ Đây chính là **runtime polymorphism**.
+Không phải compiler chọn — **CPU chọn vào lúc chạy dựa trên vPtr**.
+
+---
+
+## **6. Tại sao luôn gọi đúng hàm override?**
+
+Vì:
+
+* Mỗi object có **vPtr riêng**
+* vPtr luôn trỏ đúng vTable của class thật
+* vTable chứa đúng địa chỉ của hàm override
+
+→ Không thể gọi nhầm.
+
+Ngoại lệ duy nhất: **object slicing**.
+
+---
+
+## **7. Khi delete object qua con trỏ base**
+
+Nếu bạn làm:
+
+```cpp
+Base* p = new Derived();
+delete p;
+```
+
+* CPU dùng `Base`'s vTable để gọi destructor
+* Nếu destructor không virtual → chỉ gọi Base::~Base
+  → **rò rỉ và undefined behavior**
+
+---
+
+## **8. Tóm tắt toàn bộ quá trình trong 12 bước**
+
+Dùng làm tài liệu:
+
+1. Compiler phân tích class và hàm virtual.
+2. Compiler tạo vTable cho từng class có virtual.
+3. Compiler thêm vPtr vào object layout.
+4. Linker hợp nhất vTable và mã máy.
+5. Chương trình được tạo thành file executable.
+6. OS loader nạp code + vTables vào RAM.
+7. CPU bắt đầu chạy tại `main()`.
+8. Gọi `new Derived()` → heap cấp phát bộ nhớ.
+9. Constructor của Derived gán vPtr = Derived::vTable.
+10. Khi p->f() → CPU lấy vPtr từ object.
+11. CPU truy cập vTable → lấy đúng function pointer.
+12. CPU `call` đúng hàm override → runtime polymorphism xảy ra.
+
+---
+
+2. Virtual Function:
+	- Hàm ảo là hàm được khai báo virtual trong class base và cho phép lớp dẫn xuất có thể override lại. 
+
++ VTable và VPointer
+	- VTable: điều đầu tiên cần hiểu là Vtable thuộc về Class.
+		+ Class có vtable khi: 
+			- Có ít nhất 1 virtual function hoặc pure virtual function.
+			- là class kế thừa từ 1 class khác có virtual function.
+		+ Vtable chứa các function pointer, hay nói cách khác là con trỏ trỏ đến địa chỉ của các hàm được 
+			override gần nhất. Cái này hơi khó hiểu, kiểu như class Cha có 3 hàm x, y, z virtual thì Vtable của Cha
+			chứa function pointer trỏ đến địa chỉ 3 thằng này. Class Con có 2 hàm x,y override lại của cha còn z thì
+			không, lúc này Vtable của Con chứa 2 function pointer trỏ đến 2 hàm x,y đã override và 1 function pointer
+			trỏ đến hàm z của lớp cha.
+			
+		class OngNoi{
+		  public:
+			virtual void function_1(){
+				cout<<"Function 1 cua Ong noi"<<endl;
+			}
+			virtual void function_2(){
+				cout<<"Function 2 cua Ong noi"<<endl;
+			}
+			virtual void function_3(){
+				cout<<"Function 3 cua Ong noi"<<endl;
+			}
+		};
+
+		class Cha : public OngNoi{
+		 public:
+			void function_1() override{
+				cout<<"Function 1 cua Cha"<<endl;
+			}
+		};
+		class Con : public Cha{
+		 public:
+			void function_2() override{
+				cout<<"Function 2 cua Con"<<endl;
+			}
+		};
+		int main(){
+			OngNoi* a = new OngNoi();
+			OngNoi* b = new Cha();
+			OngNoi* c = new Con();
+			
+			a->function_1();
+			a->function_2();
+			a->function_3();
+			
+			b->function_1();
+			b->function_2();
+			b->function_3();
+			
+			c->function_1();
+			c->function_2();
+			c->function_3();  
+			delete a;
+			delete b;
+			delete c;
+		}
+		
+		Function 1 cua Ong noi
+		Function 2 cua Ong noi
+		Function 3 cua Ong noi
+		
+		Function 1 cua Cha
+		Function 2 cua Ong noi
+		Function 3 cua Ong noi
+		
+		Function 1 cua Cha
+		Function 2 cua Con
+		Function 3 cua Ong noi
+		
+	- VPointer: Là 1 con trỏ ẩn được compiler thêm vào các object tương ứng với class có Vtable.
+		Khi biên dịch nó sẽ được thêm vào trước các member của object (dứng đầu).
+		Vptr sẽ trỏ đến Vtable của class tương ứng với object chứa nó. Hay nói cách khác Vptr thuộc 
+		object còn Vtable thuộc class. Vptr của các obj cùng loại sẽ trỏ đến cùng 1 Vtable.
+
+3. Virtual Destructor: 
+	- Khi delete 1 object thông qua con trỏ base, ta cần có Virtual destructor để destructor của lớp 
+	Dẫn xuất được gọi trước. Nếu không có nó sẽ không được gọi. 
+	Nếu destructor không virtual và bạn delete basePtr mà basePtr trỏ tới Derived, gọi destructor chỉ của Base
+	— dẫn đến undefined behavior (thường là rò rỉ bộ nhớ, không giải phóng thành phần Derived, hoặc hỏng trạng thái)
+	
+4. Từ khóa Override:
+	- GIúp đảm bảo rằng phương thức thực sự ghi đè phương thức lớp cơ sỏ.
+	- Nếu có sai sót như khác tham số, khác kiểu trả về trình biên dịch sẽ báo lỗi
+	
+	- Nguyên tắc vàng khi Override: Chỉ khi signature của hàm trùng khớp 100% thì override mới xảy ra:
+		+ Tên hàm
+		+ Danh sách tham số
+		+ Có const hay không cũng phải đồng nhất.
+		+ Return type (trừ trường hợp covariant: method Base trả về Base*, methob class con có thể trả về Derived*
+	
+5. Từ khóa Final: 
+	- Dùng với function:
+		virtual void function_1() final{}
+		-> Chống ghi đè
+	Dùng với Class:
+	
+		class A final {
+		 public:
+			void function(){}
+		}
+		-> Chống kế thừa.
