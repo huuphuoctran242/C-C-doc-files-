@@ -1,0 +1,54 @@
+I. Tổng quan về kế thừa: 
+	- Là cơ chế cho phép 1 class mới tái sử dụng và mở rộng các thuộc tính và method của 1 lớp khác.
+	- Dùng kế thừa khi quan hệ giữa các lớp là: Is A. vd Cat Is A Animal.
+	- Lợi ích: Tái sử dụng code. Giảm trùng lặp. Làm cơ sở cho Đa hình.
+	
+	+ Vậy lớp con kế thừa những gì từ lớp cha: Hầu hết mọi thứ
+		- Mọi data member: public, protected và private ( tuy nhiên không truy cập được private) 
+		-> Cái này còn tùy thuộc về kiểu kế thừa sẽ bàn sau.
+		- Các Member function
+		- Virtual function -> hỗ trợ override
+		- các static member -> dùng chung luôn: Base::static_member = Derived::static_member
+		- Mọi nested class và typedef
+		
+	+ Những thứ không kế thừa: 
+		- Constructor
+		- Destructor
+		- Copy/move constructor
+		- Operator=
+		- Friend
+		- Quyền truy cập private.
+		
+	+ Hiểu đơn giản thì khi Con kế thừa cha thì trong Con cũng có Cha trong đó.
+
+II. 3 Kiểu kế thừa trong C++:
+	
+	| Thành phần của Base | public inheritance | protected inheritance | private inheritance |
+	| ------------------- | ------------------ | --------------------- | ------------------- |
+	| **public**          | public             | protected             | private             |
+	| **protected**       | protected          | protected             | private             |
+	| **private**         | không truy cập     | không truy cập        | không truy cập      |
+
+	Ta hiểu rằng khi kế thừa thì lớp con sẽ chứa cả thành phần của lớp cha. Với access modifier sẽ được
+	định nghĩa như sau:
+	- Khi kế thừa kiểu public: 
+		+ những member là public trong Base cũng sẽ là public trong Derived. nghĩa có thể truy cập từ 
+		trong Derived hoặc bên ngoài.
+		+ Những member kiểu protected cũng sẽ là protected trong Derived. Tức là chỉ truy cập được từ
+		trong Derived và lớp kế thừa Derived.
+		+ Những member kiểu private sẽ không thể truy cập được trực tiếp mà phải dùng getter setter. 
+		
+	- Khi kế thừa kiểu protected:
+		
+		+ Những member kiểu protected và public đều cũng sẽ là protected trong Derived. Tức là chỉ truy cập được từ
+		trong Derived và lớp kế thừa Derived.
+		+ Những member kiểu private sẽ không thể truy cập được trực tiếp mà phải dùng getter setter.
+	
+	- Kế thừa kiểu private: 
+		+ Những member kiểu protected và public đều cũng sẽ là private trong Derived. Tức là chỉ truy cập được từ
+		trong Derived.
+		+ Những member kiểu private sẽ không thể truy cập được trực tiếp mà phải dùng getter setter.
+	
+	
+II. Constructor và Destructor trong kế thừa:
+	- 
