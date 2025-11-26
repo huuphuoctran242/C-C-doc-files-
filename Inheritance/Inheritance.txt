@@ -51,4 +51,122 @@ II. 3 Kiểu kế thừa trong C++:
 	
 	
 II. Constructor và Destructor trong kế thừa:
-	- 
+	- Constructor và destructor không được kế thừa.
+	- Tuy nhiên Constructor và Destructor của lớp cha vẫn tham gia vào quá trình tạo và hủy Object của lớp con.
+	
+	+ Quy trình khởi tạo một object lớp con: 
+		- Khi khởi tạo sẽ gọi constructor của Base -> constructor của Derived
+		- Khi hủy thì ngược lại, gọi destructor của Derived rồi mới đến Destructor của Base. 
+		- Nói thì đơn giản nhưng ở đây sẽ có vấn đề khác nhau khi ta dùng khởi tạo trực tiếp
+		object của lớp Derived và sử dụng con trỏ base. 
+		
+		Ví dụ 1: 
+		class Base{
+		 public:
+			Base(){cout<<"Base constructor"<<endl;}
+			~Base(){cout<<"Base destructor"<<endl;}
+		};
+		class Derived:public Base{
+		 public:
+			Derived(){cout<<"Derived constructor"<<endl;}
+			~Derived(){cout<<"Derived destructor"<<endl;}
+		};
+
+		int main() {
+			Derived b;
+		}
+		
+		- Output: 
+			Base constructor
+			Derived constructor
+			Derived destructor
+			Base destructor
+		Ở đây ta có thể thấy khi tạo trực tiếp object của lớp Derived thì thứ tự gọi đúng như ta nói.
+		Tuy nhiên nếu ở đây ta sử dụng con trỏ base thì sao ? 
+		
+		int main() {
+			//Derived b;
+			Base* ptr = new Derived();
+			delete ptr;
+		}
+		OutPut:
+			Base constructor
+			Derived constructor
+			Base destructor
+		Từ đây ta thấy nếu dùng con trỏ base thì Destructor của lớp Derived sẽ không được gọi.
+		Vấn đề ở đây là Destructor của Base không được khai báo Virtual.
+		
+		=> Cần virtual Destructor khi delete object của class Derived qua con trỏ Base. 
+
+
+	+ Tại sao lớp con gọi được constructor của lớp cha dù constructor không được kế thừa?
+		- Hiểu đơn giản là trong Con có 1 phần là Cha nên để tạo đối tượng COn thì compiler
+		phải tạo phần cha trước -> gọi constructor của cha rồi mới gọi constructor của con.
+		
+	+ Làm sao để lớp con gọi constructor lớp cha ?
+		- Nếu bạn del làm gì thì nó sẽ được gọi constructor mặc định của cha Base();
+		- Nếu lớp Cha không có Constructor mặc định( bạn đã định nghĩa constructor rồi) thì 
+			lớp Con bắt buộc phải gọi constructor của lớp Cha nếu không chương trình sẽ lỗi.
+			
+		- Vậy gọi như thế nào ? -> Gọi bằng danh sách khởi tạo
+		
+			class Base{
+			 private:
+				int x;
+			 public:
+				Base(int a):x(a){cout<<"Base constructor"<<endl;}
+				virtual ~Base(){cout<<"Base destructor"<<endl;}
+			};
+			class Derived:public Base{
+			 private:
+				int y;
+			 public:
+				Derived(int a,int b):Base(a),y(b){cout<<"Derived constructor"<<endl;}
+				~Derived(){cout<<"Derived destructor"<<endl;}
+			};
+
+			int main() {
+				Base* ptr = new Derived(1,2);
+				delete ptr;
+			}
+			
+			Base constructor
+			Derived constructor
+			Derived destructor
+			Base destructor
+			
+	
+	+ Trong kế thừa C++, copy constructor, move constructor và operator= của lớp con luôn phải 
+	(và compiler cũng luôn tự động) gọi phiên bản tương ứng của lớp cha — trừ khi bạn cố tình 
+	override theo kiểu sai.
+	Đây là quy tắc nền tảng vì phần Base của object cũng cần được copy/move/assign giống như phần Derived.
+	
+	+ Hàm overload của lớp cha được kế thừa đầy đủ.
+		Nhưng nếu lớp con định nghĩa 1 hàm cùng tên → toàn bộ overload cha sẽ bị ẩn.
+		Muốn lấy lại → dùng using Base::functionName.
+		
+		class Base {
+		public:
+			void f(int)   { cout << "Base f(int)\n"; }
+			void f(double){ cout << "Base f(double)\n"; }
+		};
+		class Derived : public Base {
+		public:
+			using Base::f; 
+			void f(string) { cout << "Derived f(string)\n"; }
+		
+		};
+		int main(){
+			Derived d;
+			d.f("hello");  // Derived f(string)
+			d.f(10);       // Base f(int) // Nếu không có using Base::f thì sẽ lỗi
+			d.f(3.14);     // Base f(double) // Nếu không có using Base::f thì sẽ lỗi
+		}
+		
+		
+	Chưa học:  Base::method() và using Base::method. Gọi method lớp cha. 
+				+ Dùng con trỏ base gọi method riêng của lớp con. 
+				+ Sử dụng các hàm có tham số và return kiểu base những vẫn sử dụng với kiểu con được.
+				+ Viết lại hêt copy constructor, overload toán tử,... của lớp con
+				+ bảng so sánh giữa static_cast, dynamic_cast, reinterpret_cast và const_cast?
+	
