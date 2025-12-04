@@ -1,0 +1,41 @@
+ I. Computer hardware review:
+ 
+	1. Processors:
+		- CPU là bộ não của máy tính.
+		- Khi chạy 1 chương trình, CPU sẽ fetch các instruction từ vùng code segment trong memory rồi thực hiện 
+		- Việc truy cập vùng nhớ để lấy thông tin/data sẽ mất nhiều thời gian hơn việc execute 1 instruction,
+			do đó CPU có những thanh ghi riêng bên trong để lưu trữ các key variable / temporary result.
+			Ngoài các thanh ghi còn có : + Program counter: địa chỉ của instruction tiếp theo
+										 + Stack pointer
+										 + PSW: chứa thông tin về mode (user/kernel), và rất nhiều thông tin về control bits.
+		- Với mỗi instruction CPU thực hiện pipeline sau:
+			fetch unit -> decode unit -> execute unit.
+			
+		- Tuy nhiên để tăng hiệu suất thì khi đang execute instruction 1, ta có thể đang decode instruction 2 và 
+		fetch instruction 3 cùng lúc.
+		
+	##	Kernel mode và User mode:
+		- CPU cung cấp 2 chế độ hoạt động user mode và kernel mode (được quyết định ở thanh ghi PSW.
+		- User mode: 
+			+ Có quyền truy cập hạn chế, chỉ được phép thực hiện 1 số tập lệnh giới hạn.
+			+ Không thể truy cập trực tiếp vào phần cứng ( bộ nhớ, thiết bị ngoại vi)
+			+ Chỉ truy cập được vào vùng nhớ của ứng dụng.
+			+ Bảo vệ hệ thống: Nếu xảy ra lỗi chỉ chương trình bị ảnh hưởng, hệ điều hành và các chương trình
+			khác vẫn an toàn.
+			+ Nếu chương trình cần thao tác với phần cứng hoặc tài nguyên hệ thống -> cần gửi system call đến 
+			kernel, lúc đó CPU sẽ chuyển sáng mode Kernel để thực thi yêu cầu này.
+		
+		- Kernel mode:
+			+ Có quyền truy cập đầy đủ, được phép thực hiện mọi lệnh.
+			+ Rủi ro cao: Nếu có lỗi ở Kernel mode ( ví dụ truy cập vùng nhớ không hợp lệ)
+			-> Sập hệ thống.
+		
+	=> Bảo vệ hệ thống. 
+			- Tất cả các user program đều chạy ở usermode
+			
+	## Multithreaded:
+		- Thông thường 1 thread sẽ chạy trên một CPU(core riêng biệt)
+		- Tuy nhiên cũng có trường hợp 2 thread cùng chạy trên 1 CPU, thực tế lúc này CPU switch 
+		qua lại để thực hiện 2 thread chứ không phải song song hoàn toàn.
+	
+	2. Memory:
