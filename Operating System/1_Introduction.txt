@@ -1,4 +1,37 @@
- I. Computer hardware review:
+
+	
+	==================================================================================================
+	1. WHAT IS AN OPERATING SYSTEM?
+	OS có thể được hiểu theo nhiều góc độ khác nhau.
+		+ Là lớp trung gian giữa phần cứng và người dùng/ chương trình.
+		
+		+ Là 1 Extended Machine (máy mở rộng) cung cấp cho người dùng 1 máy ảo đơn giản hơn.(abtraction)
+		-> Thay vì phải biết về sector, block, timing thì ta sử dụng file hoặc các hàm open(), read(),write()
+		Các abtraction quan trọng mà OS cung cấp:
+			- CPU -> Process /Thread
+			- RAM -> Virtual Memory
+			- Disk -> File
+			- I/O device -> File descriptor
+			
+		+ Là một trình quản lý tài nguyên.
+			Một máy tính có 1 CPU(hoặc vài core), RAM giới hạn, Disk, thiết bị I/O nhưng có hàng trăm process,
+			nhiều user, nhiều app chạy đồng thời
+			-> Ai dùng CPU trước, ai được cấp bao nhiêu RAM,nếu 2 process cùng ghi vào file thì sao ?
+			Ta cần OS làm trọng tài ở đây.
+			
+		🔹 Nhiệm vụ của OS với tư cách Resource Manager
+				Phân phối tài nguyên
+					CPU scheduling
+					Memory allocation
+				Đảm bảo công bằng
+					Không process nào “chiếm hết” CPU
+				Đảm bảo hiệu quả
+					Tối ưu throughput, response time
+				Bảo vệ
+					Process không được truy cập trái phép tài nguyên của process khác
+	
+	
+2. Computer hardware review:
  
 	1. Processors:
 		- CPU là bộ não của máy tính.
@@ -14,7 +47,7 @@
 		- Tuy nhiên để tăng hiệu suất thì khi đang execute instruction 1, ta có thể đang decode instruction 2 và 
 		fetch instruction 3 cùng lúc.
 		
-	##	Kernel mode và User mode:
+	+	Kernel mode và User mode:
 		- CPU cung cấp 2 chế độ hoạt động user mode và kernel mode (được quyết định ở thanh ghi PSW.
 		- User mode: 
 			+ Có quyền truy cập hạn chế, chỉ được phép thực hiện 1 số tập lệnh giới hạn.
@@ -31,11 +64,28 @@
 			-> Sập hệ thống.
 		
 	=> Bảo vệ hệ thống. 
-			- Tất cả các user program đều chạy ở usermode
+			- Tất cả các user program đều chạy ở usermode. Không được tắt CPU, ghi trực tiếp vào ổ đĩa
+			-> Phải gọi system call
 			
-	## Multithreaded:
+	+ Multithreaded:
 		- Thông thường 1 thread sẽ chạy trên một CPU(core riêng biệt)
 		- Tuy nhiên cũng có trường hợp 2 thread cùng chạy trên 1 CPU, thực tế lúc này CPU switch 
 		qua lại để thực hiện 2 thread chứ không phải song song hoàn toàn.
 	
+	+ Interrupts và traps:
+		- Interrupts là sự kiện từ phần cứng: bàn phím, timer,..
+		- Traps là sự kiện từ phần mềm: system call, lỗi chia 0,..
+		-> Khi xảy ra các sự kiện trên thì CPU chuyển sang Kernel mode. OS dành quyền điều khiển.
+	
 	2. Memory:
+	
+	| Cấp      | Tốc độ truy cập    | Giá     |
+	| -------- | ---------- 		| ------- |
+	| Register | Rất nhanh  		| Rất đắt |
+	| Cache    | Nhanh      		| Đắt     |
+	| RAM      | Trung bình 		| Vừa     |
+	| Disk/SSD | Chậm       		| Rẻ      |
+
+ 
+	- Register là thanh ghi trong CPU, truy cập siêu nhanh.
+	- Cache là 
